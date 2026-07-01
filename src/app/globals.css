@@ -2,25 +2,38 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #2a2a2a;
+  --burgundy: #8b2942;
+  --burgundy-dark: #6e1f34;
+  --burgundy-light: #a33a55;
+  --grey-100: #f5f5f5;
+  --grey-200: #e8e8e8;
+  --grey-300: #d4d4d4;
+  --grey-500: #888888;
+  --grey-700: #555555;
+  --cream: #f9f6f2;
+  --gold: #b8860b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-burgundy: var(--burgundy);
+  --color-burgundy-dark: var(--burgundy-dark);
+  --color-burgundy-light: var(--burgundy-light);
+  --color-grey-100: var(--grey-100);
+  --color-grey-200: var(--grey-200);
+  --color-grey-300: var(--grey-300);
+  --color-grey-500: var(--grey-500);
+  --color-grey-700: var(--grey-700);
+  --color-cream: var(--cream);
+  --color-gold: var(--gold);
+  --font-sans: var(--font-source-sans);
+  --font-serif: var(--font-playfair);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-source-sans), Arial, Helvetica, sans-serif;
 }
