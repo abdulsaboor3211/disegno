@@ -1,7 +1,9 @@
-import { products } from "@/data/products";
+import { getProducts } from "@/lib/googleSheets";
 import ProductCard from "./ProductCard";
 
-export default function ProductsSection() {
+export default async function ProductsSection() {
+  const products = await getProducts();
+
   return (
     <section id="products" className="py-14 sm:py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

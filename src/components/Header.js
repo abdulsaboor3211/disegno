@@ -19,10 +19,10 @@ export default function Header() {
         <div className="flex items-center justify-between h-16 sm:h-20">
           <Link href="/" className="flex items-center gap-3 shrink-0">
             <Image
-              src="/disegno-kheri-logo.png"
-              alt="Disegno Kheri logo"
-              width={44}
-              height={44}
+              src="/logo.jpeg"
+              alt="Kera logo"
+              width={66}
+              height={66}
               className="object-contain"
             />
             <div className="hidden sm:block">

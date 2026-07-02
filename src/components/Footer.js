@@ -9,11 +9,11 @@ export default function Footer() {
           <div>
             <Link href="/" className="flex items-center gap-3 mb-4">
               <Image
-                src="/disegno-kheri-logo.png"
+                src="/logo.jpeg"
                 alt="Disegno Kheri"
-                width={40}
-                height={40}
-                className="object-contain brightness-0 invert"
+                width={66}
+                height={66}
+                className="object-contain"
               />
               <span className="font-serif text-lg font-semibold">Disegno Kheri</span>
             </Link>

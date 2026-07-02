@@ -1,7 +1,7 @@
-const PRODUCT_IMAGE =
+export const PRODUCT_IMAGE =
   "https://berastores.com/cdn/shop/files/burgundy_T-shape__peshawari_chappal_side_view.webp?v=1728728546&width=360";
 
-export const products = [
+export const fallbackProducts = [
   {
     sku: "BK-001",
     productName: "Classic Burgundy Peshawari Kheri",
@@ -92,6 +92,12 @@ export const products = [
   },
 ];
 
+export const products = fallbackProducts;
+
 export function formatPrice(amount) {
-  return `Rs. ${amount.toLocaleString("en-PK")}`;
+  if (!amount) {
+    return "";
+  }
+
+  return `Rs. ${Number(amount).toLocaleString("en-PK")}`;
 }
