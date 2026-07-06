@@ -16,7 +16,10 @@ export default function ProductCard({ product }) {
   return (
     <article className="group bg-white border border-grey-200 hover:border-burgundy/40 transition-colors flex flex-col">
       <div className="relative aspect-square bg-grey-100 overflow-hidden">
-        <Link href={`/products/${encodeURIComponent(product.sku)}`}>
+        <Link
+          href={`/products/${encodeURIComponent(product.sku)}`}
+          className="relative block w-full h-full"
+        >
           <Image
             src={product.productImage}
             alt={product.productName}

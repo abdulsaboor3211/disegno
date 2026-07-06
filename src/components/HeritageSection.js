@@ -1,7 +1,6 @@
 import Image from "next/image";
 
-const HERITAGE_IMAGE =
-  "https://berastores.com/cdn/shop/files/burgundy_T-shape__peshawari_chappal_side_view.webp?v=1728728546&width=360";
+const HERITAGE_IMAGE = "/3s.jpeg";
 
 export default function HeritageSection() {
   return (

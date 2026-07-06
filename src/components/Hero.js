@@ -1,15 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const HERO_IMAGE =
-  "https://berastores.com/cdn/shop/files/burgundy_T-shape__peshawari_chappal_side_view.webp?v=1728728546&width=360";
+const HERO_IMAGE = "/hero.jpeg";
 
 export default function Hero() {
   return (
     <section className="relative bg-cream border-b border-grey-200 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-12 sm:py-16 lg:py-20">
-          <div className="order-2 lg:order-1 text-center lg:text-left">
+          <div className="text-center lg:text-left">
             <p className="text-burgundy text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] mb-4">
               Handmade in Peshawar
             </p>
@@ -60,7 +59,7 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="order-1 lg:order-2 flex justify-center">
+          <div className="flex justify-center">
             <div className="relative w-full max-w-md lg:max-w-lg">
               <div className="absolute inset-0 bg-burgundy/5 translate-x-3 translate-y-3" />
               <div className="relative bg-white border border-grey-200 p-6 sm:p-10">

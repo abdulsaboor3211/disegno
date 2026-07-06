@@ -1,4 +1,5 @@
 import { fallbackProducts, PRODUCT_IMAGE } from "@/data/products";
+import { normalizeImageUrl } from "@/lib/imageUrl";
 
 const SHEET_ID = "15Bad1tfOwUmbozMDdLAnEGqNP7_8fxxroXnUyDSXWzE";
 const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
@@ -107,7 +108,7 @@ export async function getProducts() {
         productPrice: toNumber(row.ProductPrice),
         discountPrice: toNumber(row.DiscountPrice),
         productDescription: row.ProductDescription,
-        productImage: row.ProductImage || PRODUCT_IMAGE,
+        productImage: normalizeImageUrl(row.ProductImage || PRODUCT_IMAGE),
         status: "Active",
       }))
       .filter((product) => product.sku && product.productName);
@@ -129,7 +130,7 @@ export async function getVariants() {
         color: row.Color,
         variantOriginalPrice: toNumber(row.VariantOrignalPrice),
         variantDiscountPrice: toNumber(row.VariantDiscountPrice),
-        variantImage: row.VariantImage || PRODUCT_IMAGE,
+        variantImage: normalizeImageUrl(row.VariantImage || PRODUCT_IMAGE),
         status: row.Status || "Active",
       }))
       .filter((variant) => variant.productSku && variant.status !== "Inactive");

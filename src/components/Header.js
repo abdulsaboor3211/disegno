@@ -17,22 +17,15 @@ export default function Header() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
-          <Link href="/" className="flex items-center gap-3 shrink-0">
+          <Link href="/" className="flex items-center shrink-0">
             <Image
-              src="/logo.jpeg"
-              alt="Kera logo"
-              width={66}
-              height={66}
-              className="object-contain"
+              src="/navbar.png"
+              alt="Disegno"
+              width={160}
+              height={48}
+              className="h-8 sm:h-10 w-auto object-contain"
+              priority
             />
-            <div className="hidden sm:block">
-              <span className="font-serif text-xl font-semibold text-burgundy tracking-wide">
-                Disegno Kheri
-              </span>
-              <p className="text-[10px] text-grey-500 uppercase tracking-[0.2em] -mt-0.5">
-                Peshawari Chappals
-              </p>
-            </div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">

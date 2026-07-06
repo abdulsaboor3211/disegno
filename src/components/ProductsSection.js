@@ -21,38 +21,22 @@ export default async function ProductsSection() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10">
-          {["All", "Burgundy", "Brown", "Black", "Tan", "Maroon"].map(
-            (filter) => (
-              <button
-                key={filter}
-                type="button"
-                className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider border transition-colors ${
-                  filter === "All"
-                    ? "bg-burgundy text-white border-burgundy"
-                    : "bg-white text-grey-700 border-grey-300 hover:border-burgundy hover:text-burgundy"
-                }`}
-              >
-                {filter}
-              </button>
-            )
-          )}
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {products.map((product) => (
             <ProductCard key={product.sku} product={product} />
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <button
-            type="button"
-            className="inline-flex items-center justify-center px-10 py-3.5 border-2 border-burgundy text-burgundy text-sm font-semibold uppercase tracking-wider hover:bg-burgundy hover:text-white transition-colors"
-          >
-            View All Products
-          </button>
-        </div>
+        {products.length > 8 && (
+          <div className="text-center mt-12">
+            <button
+              type="button"
+              className="inline-flex items-center justify-center px-10 py-3.5 border-2 border-burgundy text-burgundy text-sm font-semibold uppercase tracking-wider hover:bg-burgundy hover:text-white transition-colors"
+            >
+              View All Products
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

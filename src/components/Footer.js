@@ -7,15 +7,14 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>
-            <Link href="/" className="flex items-center gap-3 mb-4">
+            <Link href="/" className="inline-block mb-4">
               <Image
-                src="/logo.jpeg"
-                alt="Disegno Kheri"
-                width={66}
-                height={66}
-                className="object-contain"
+                src="/foot.png"
+                alt="Disegno"
+                width={140}
+                height={42}
+                className="h-9 w-auto object-contain"
               />
-              <span className="font-serif text-lg font-semibold">Disegno Kheri</span>
             </Link>
             <p className="text-sm text-grey-300 leading-relaxed">
               Premium handmade Peshawari Kheri chappals. Tradition meets
