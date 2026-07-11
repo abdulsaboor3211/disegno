@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { formatPrice } from "@/data/products";
 
 export default function VariantCard({ variant }) {
@@ -12,6 +13,8 @@ export default function VariantCard({ variant }) {
           100
       )
     : 0;
+
+  const orderHref = `/order?sku=${encodeURIComponent(variant.productSku)}&size=${encodeURIComponent(variant.size || "")}&color=${encodeURIComponent(variant.color || "")}`;
 
   return (
     <article className="group bg-white border border-grey-200 hover:border-burgundy/40 transition-colors flex flex-col">
@@ -77,12 +80,12 @@ export default function VariantCard({ variant }) {
               </p>
             )}
           </div>
-          <button
-            type="button"
+          <Link
+            href={orderHref}
             className="px-4 py-2 bg-burgundy text-white text-xs font-semibold uppercase tracking-wider hover:bg-burgundy-dark transition-colors shrink-0"
           >
-            Add to Cart
-          </button>
+            Order Now
+          </Link>
         </div>
       </div>
     </article>
