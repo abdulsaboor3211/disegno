@@ -1,5 +1,6 @@
 import { Playfair_Display, Source_Sans_3 } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -27,7 +28,10 @@ export default function RootLayout({ children }) {
       className={`${playfair.variable} ${sourceSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          {children}
+          <WhatsAppFloat />
+        </CartProvider>
       </body>
     </html>
   );

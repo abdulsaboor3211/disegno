@@ -1,5 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import {
+  CONTACT_EMAIL,
+  CONTACT_MAILTO,
+  CONTACT_WHATSAPP_DISPLAY,
+  WHATSAPP_CHAT_URL,
+} from "@/data/contact";
 
 export default function Footer() {
   return (
@@ -27,18 +33,38 @@ export default function Footer() {
               Quick Links
             </h4>
             <ul className="space-y-2">
-              {["Home", "Shop", "Our Story", "Size Guide", "Contact"].map(
-                (link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
-                      className="text-sm text-grey-300 hover:text-white transition-colors"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                )
-              )}
+              <li>
+                <Link
+                  href="/"
+                  className="text-sm text-grey-300 hover:text-white transition-colors"
+                >
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/#products"
+                  className="text-sm text-grey-300 hover:text-white transition-colors"
+                >
+                  Shop
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/#heritage"
+                  className="text-sm text-grey-300 hover:text-white transition-colors"
+                >
+                  Our Story
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-sm text-grey-300 hover:text-white transition-colors"
+                >
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -54,12 +80,12 @@ export default function Footer() {
                 "FAQs",
               ].map((link) => (
                 <li key={link}>
-                  <a
-                    href="#"
+                  <Link
+                    href="/contact"
                     className="text-sm text-grey-300 hover:text-white transition-colors"
                   >
                     {link}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -73,25 +99,33 @@ export default function Footer() {
               <li>Peshawar, Pakistan</li>
               <li>
                 <a
-                  href="mailto:info@disegnokheri.com"
+                  href={CONTACT_MAILTO}
                   className="hover:text-white transition-colors"
                 >
-                  info@disegnokheri.com
+                  {CONTACT_EMAIL}
                 </a>
               </li>
-              <li>+92 300 0000000</li>
+              <li>
+                <a
+                  href={WHATSAPP_CHAT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
+                  {CONTACT_WHATSAPP_DISPLAY}
+                </a>
+              </li>
             </ul>
             <div className="flex gap-3 mt-5">
-              {["Facebook", "Instagram", "WhatsApp"].map((social) => (
-                <a
-                  key={social}
-                  href="#"
-                  aria-label={social}
-                  className="w-9 h-9 border border-grey-500 flex items-center justify-center text-xs hover:border-burgundy-light hover:text-burgundy-light transition-colors"
-                >
-                  {social[0]}
-                </a>
-              ))}
+              <a
+                href={WHATSAPP_CHAT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="w-9 h-9 border border-grey-500 flex items-center justify-center text-xs hover:border-burgundy-light hover:text-burgundy-light transition-colors"
+              >
+                W
+              </a>
             </div>
           </div>
         </div>
