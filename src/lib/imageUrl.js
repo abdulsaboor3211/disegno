@@ -3,11 +3,11 @@
  * Next.js Image needs a direct image URL — convert Drive links to lh3.googleusercontent.com.
  */
 export function normalizeImageUrl(url) {
-  if (!url || typeof url !== "string") {
-    return url;
+  if (!isValidImageSrc(url)) {
+    return "";
   }
 
-  const trimmed = url.trim();
+  const trimmed = cleanImageSrc(url);
 
   if (!trimmed.includes("drive.google.com")) {
     return trimmed;
@@ -24,4 +24,31 @@ export function normalizeImageUrl(url) {
   }
 
   return trimmed;
+}
+
+export function cleanImageSrc(url) {
+  if (!url || typeof url !== "string") {
+    return "";
+  }
+
+  return url
+    .trim()
+    .replace(/^"+|"+$/g, "")
+    .replace(/^'+|'+$/g, "")
+    .trim();
+}
+
+export function isValidImageSrc(url) {
+  const trimmed = cleanImageSrc(url);
+
+  if (!trimmed || trimmed === '""' || trimmed === "''" || trimmed === "-") {
+    return false;
+  }
+
+  return (
+    trimmed.startsWith("/") ||
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("data:image/")
+  );
 }

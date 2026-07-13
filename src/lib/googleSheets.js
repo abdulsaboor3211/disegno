@@ -1,22 +1,8 @@
-import { fallbackProducts, PRODUCT_IMAGE } from "@/data/products";
-import { normalizeImageUrl } from "@/lib/imageUrl";
+import { fallbackProducts } from "@/data/products";
+import { isValidImageSrc, normalizeImageUrl } from "@/lib/imageUrl";
 
 const SHEET_ID = "15Bad1tfOwUmbozMDdLAnEGqNP7_8fxxroXnUyDSXWzE";
 const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
-
-const fallbackVariants = fallbackProducts.flatMap((product) =>
-  ["7", "8", "9", "10"].map((size, index) => ({
-    productSku: product.sku,
-    size,
-    color: product.color || "Burgundy",
-    variantOriginalPrice: product.productPrice + index * 100,
-    variantDiscountPrice: product.discountPrice
-      ? product.discountPrice + index * 100
-      : null,
-    variantImage: product.productImage,
-    status: "Active",
-  }))
-);
 
 function csvUrl(sheetName) {
   return `${SHEET_BASE_URL}&sheet=${encodeURIComponent(sheetName)}`;
@@ -85,6 +71,16 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function getPosterImage(row) {
+  return (
+    row["poster-Image"] ||
+    row["Poster-Image"] ||
+    row["poster-image"] ||
+    row.PosterImage ||
+    ""
+  );
+}
+
 async function fetchSheetRows(sheetName) {
   const response = await fetch(csvUrl(sheetName), {
     next: { revalidate: 60 },
@@ -102,16 +98,30 @@ export async function getProducts() {
   try {
     const rows = await fetchSheetRows("sheet1");
     const products = rows
-      .map((row) => ({
-        sku: row.SKU,
-        productName: row.ProdutName,
-        productPrice: toNumber(row.ProductPrice),
-        discountPrice: toNumber(row.DiscountPrice),
-        productDescription: row.ProductDescription,
-        productImage: normalizeImageUrl(row.ProductImage || PRODUCT_IMAGE),
-        status: "Active",
-      }))
-      .filter((product) => product.sku && product.productName);
+      .map((row) => {
+        const posterRaw = getPosterImage(row);
+
+        return {
+          sku: row.SKU,
+          productName: row.ProdutName,
+          productPrice: toNumber(row.ProductPrice),
+          discountPrice: toNumber(row.DiscountPrice),
+          productDescription: row.ProductDescription || "",
+          productImage: isValidImageSrc(row.ProductImage)
+            ? normalizeImageUrl(row.ProductImage)
+            : "",
+          posterImage: isValidImageSrc(posterRaw)
+            ? normalizeImageUrl(posterRaw)
+            : "",
+          status: row.Status || "Active",
+        };
+      })
+      .filter(
+        (product) =>
+          product.sku &&
+          product.productName &&
+          product.status.toLowerCase() !== "inactive"
+      );
 
     return products.length > 0 ? products : fallbackProducts;
   } catch (error) {
@@ -120,36 +130,7 @@ export async function getProducts() {
   }
 }
 
-export async function getVariants() {
-  try {
-    const rows = await fetchSheetRows("sheet2");
-    const variants = rows
-      .map((row) => ({
-        productSku: row["Product SKU"],
-        size: row.Size,
-        color: row.Color,
-        variantOriginalPrice: toNumber(row.VariantOrignalPrice),
-        variantDiscountPrice: toNumber(row.VariantDiscountPrice),
-        variantImage: normalizeImageUrl(row.VariantImage || PRODUCT_IMAGE),
-        status: row.Status || "Active",
-      }))
-      .filter((variant) => variant.productSku && variant.status !== "Inactive");
-
-    return variants.length > 0 ? variants : fallbackVariants;
-  } catch (error) {
-    console.warn(error.message);
-    return fallbackVariants;
-  }
-}
-
 export async function getProductBySku(sku) {
   const products = await getProducts();
   return products.find((product) => product.sku === decodeURIComponent(sku));
-}
-
-export async function getVariantsBySku(sku) {
-  const variants = await getVariants();
-  const decodedSku = decodeURIComponent(sku);
-
-  return variants.filter((variant) => variant.productSku === decodedSku);
 }

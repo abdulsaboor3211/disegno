@@ -31,7 +31,7 @@ export default async function ProductsSection() {
           <div className="text-center mt-12">
             <button
               type="button"
-              className="inline-flex items-center justify-center px-10 py-3.5 border-2 border-burgundy text-burgundy text-sm font-semibold uppercase tracking-wider hover:bg-burgundy hover:text-white transition-colors"
+              className="inline-flex items-center justify-center px-10 py-3.5 border-2 border-burgundy text-burgundy text-sm font-semibold uppercase tracking-wider hover:bg-action hover:text-white transition-colors"
             >
               View All Products
             </button>

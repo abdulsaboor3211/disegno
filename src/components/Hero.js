@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 
-const HERO_IMAGE = "/hero.jpeg";
+const HERO_IMAGE = "/home-hero.webp";
+const ABOVE_HERO_IMAGE = "/above-hero.png";
 
 export default function Hero() {
   return (
@@ -12,7 +12,7 @@ export default function Hero() {
             <p className="text-burgundy text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] mb-4">
               Handmade in Peshawar
             </p>
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold text-foreground leading-tight mb-6">
+            <h1 className="font-sans text-4xl sm:text-5xl lg:text-6xl font-semibold text-foreground leading-tight mb-6">
               Peshawari Kheri
               <span className="block text-burgundy mt-1">Crafted with Heritage</span>
             </h1>
@@ -24,7 +24,7 @@ export default function Hero() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
               <a
                 href="#products"
-                className="inline-flex items-center justify-center px-8 py-3.5 bg-burgundy text-white text-sm font-semibold uppercase tracking-wider hover:bg-burgundy-dark transition-colors"
+                className="inline-flex items-center justify-center px-8 py-3.5 bg-action text-white text-sm font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors"
               >
                 Shop Collection
               </a>
@@ -59,18 +59,30 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="flex justify-center">
-            <div className="relative w-full max-w-md lg:max-w-lg">
-              <div className="absolute inset-0 bg-burgundy/5 translate-x-3 translate-y-3" />
-              <div className="relative bg-white border border-grey-200 p-6 sm:p-10">
+          <div className="flex justify-center lg:justify-end">
+            <div className="relative w-full max-w-xl lg:max-w-2xl">
+              <div className="mb-3 sm:mb-4 px-1">
                 <Image
-                  src={HERO_IMAGE}
-                  alt="Peshawari Kheri - Burgundy leather chappal"
-                  width={480}
-                  height={480}
+                  src={ABOVE_HERO_IMAGE}
+                  alt="Disegno"
+                  width={720}
+                  height={120}
                   className="w-full h-auto object-contain"
                   priority
                 />
+              </div>
+              <div className="relative">
+                <div className="absolute inset-0 bg-burgundy/5 translate-x-3 translate-y-3" />
+                <div className="relative bg-white border border-grey-200 p-2 sm:p-3">
+                  <Image
+                    src={HERO_IMAGE}
+                    alt="Peshawari Kheri - Burgundy leather chappal"
+                    width={720}
+                    height={720}
+                    className="w-full h-auto object-contain"
+                    priority
+                  />
+                </div>
               </div>
             </div>
           </div>

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import OrderForm from "@/components/OrderForm";
-import { getProductBySku, getVariantsBySku } from "@/lib/googleSheets";
+import { getProductBySku } from "@/lib/googleSheets";
 
 export const metadata = {
   title: "Place Order | Disegno",
@@ -12,9 +12,38 @@ export const metadata = {
 
 export default async function OrderPage({ searchParams }) {
   const params = await searchParams;
+  const fromCart = params.from === "cart";
   const sku = typeof params.sku === "string" ? params.sku : "";
-  const size = typeof params.size === "string" ? params.size : "";
-  const color = typeof params.color === "string" ? params.color : "";
+
+  if (fromCart) {
+    return (
+      <>
+        <Header />
+        <main className="bg-cream border-b border-grey-200">
+          <section className="py-10 sm:py-14">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <Link
+                href="/cart"
+                className="inline-flex items-center text-sm text-grey-700 hover:text-burgundy mb-8"
+              >
+                ← Back to cart
+              </Link>
+              <div className="mb-8 sm:mb-10">
+                <p className="text-burgundy text-xs font-semibold uppercase tracking-[0.25em] mb-3">
+                  Checkout
+                </p>
+                <h1 className="font-serif text-3xl sm:text-4xl font-semibold text-foreground">
+                  Complete your order
+                </h1>
+              </div>
+              <OrderForm fromCart />
+            </div>
+          </section>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   if (!sku) {
     return (
@@ -26,14 +55,23 @@ export default async function OrderPage({ searchParams }) {
               No product selected
             </h1>
             <p className="text-grey-700 mb-8">
-              Choose a variety from a product page to place an order.
+              Choose a product from the shop to place an order, or open your
+              cart.
             </p>
-            <Link
-              href="/#products"
-              className="inline-flex items-center justify-center px-8 py-3.5 bg-burgundy text-white text-sm font-semibold uppercase tracking-wider hover:bg-burgundy-dark transition-colors"
-            >
-              Browse products
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/#products"
+                className="inline-flex items-center justify-center px-8 py-3.5 bg-action text-white text-sm font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors"
+              >
+                Browse products
+              </Link>
+              <Link
+                href="/cart"
+                className="inline-flex items-center justify-center px-8 py-3.5 border-2 border-grey-300 text-grey-700 text-sm font-semibold uppercase tracking-wider hover:border-burgundy hover:text-burgundy transition-colors"
+              >
+                View cart
+              </Link>
+            </div>
           </div>
         </main>
         <Footer />
@@ -47,18 +85,6 @@ export default async function OrderPage({ searchParams }) {
     notFound();
   }
 
-  const variants = await getVariantsBySku(sku);
-  const variant =
-    variants.find(
-      (item) =>
-        String(item.size || "") === size &&
-        String(item.color || "") === color
-    ) ||
-    variants.find((item) => String(item.size || "") === size) ||
-    variants.find((item) => String(item.color || "") === color) ||
-    variants[0] ||
-    null;
-
   return (
     <>
       <Header />
@@ -66,10 +92,10 @@ export default async function OrderPage({ searchParams }) {
         <section className="py-10 sm:py-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <Link
-              href={`/products/${encodeURIComponent(product.sku)}`}
+              href="/#products"
               className="inline-flex items-center text-sm text-grey-700 hover:text-burgundy mb-8"
             >
-              ← Back to varieties
+              ← Back to products
             </Link>
             <div className="mb-8 sm:mb-10">
               <p className="text-burgundy text-xs font-semibold uppercase tracking-[0.25em] mb-3">
@@ -79,7 +105,7 @@ export default async function OrderPage({ searchParams }) {
                 Complete your order
               </h1>
             </div>
-            <OrderForm product={product} variant={variant} />
+            <OrderForm product={product} />
           </div>
         </section>
       </main>

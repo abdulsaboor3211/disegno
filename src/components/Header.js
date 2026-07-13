@@ -1,17 +1,22 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
 
 const navLinks = [
-  { label: "Home", href: "#" },
-  { label: "Shop", href: "#products" },
-  { label: "Our Story", href: "#heritage" },
-  { label: "Contact", href: "#footer" },
+  { label: "Home", href: "/" },
+  { label: "Shop", href: "/#products" },
+  { label: "Our Story", href: "/#heritage" },
+  { label: "Contact", href: "/#footer" },
 ];
 
 export default function Header() {
+  const { itemCount } = useCart();
+
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-grey-200">
-      <div className="bg-burgundy text-white text-center text-xs tracking-widest uppercase py-2 px-4">
+      <div className="bg-action text-white text-center text-xs tracking-widest uppercase py-2 px-4">
         Free delivery on orders above Rs. 5,000 across Pakistan
       </div>
 
@@ -30,39 +35,20 @@ export default function Header() {
 
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 className="text-sm font-medium text-grey-700 hover:text-burgundy transition-colors uppercase tracking-wide"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
 
           <div className="flex items-center gap-3 sm:gap-4">
-            <button
-              type="button"
-              aria-label="Search"
-              className="p-2 text-grey-700 hover:text-burgundy transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="square"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-label="Cart"
+            <Link
+              href="/cart"
+              aria-label={`Cart${itemCount > 0 ? `, ${itemCount} items` : ""}`}
               className="relative p-2 text-grey-700 hover:text-burgundy transition-colors"
             >
               <svg
@@ -79,10 +65,12 @@ export default function Header() {
                 <path d="M3 6h18" />
                 <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
-              <span className="absolute -top-0.5 -right-0.5 bg-burgundy text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center">
-                0
-              </span>
-            </button>
+              {itemCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-action text-white text-[10px] font-bold min-w-4 h-4 px-0.5 flex items-center justify-center">
+                  {itemCount > 99 ? "99+" : itemCount}
+                </span>
+              )}
+            </Link>
             <button
               type="button"
               aria-label="Menu"

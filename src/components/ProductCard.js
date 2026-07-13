@@ -1,8 +1,16 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { formatPrice } from "@/data/products";
+import { useCart } from "@/context/CartContext";
+import { isValidImageSrc } from "@/lib/imageUrl";
 
 export default function ProductCard({ product }) {
+  const { addItem } = useCart();
+  const [added, setAdded] = useState(false);
+
   const hasDiscount =
     product.discountPrice && product.discountPrice < product.productPrice;
   const discountPercent = hasDiscount
@@ -13,29 +21,32 @@ export default function ProductCard({ product }) {
       )
     : 0;
 
+  const orderHref = `/order?sku=${encodeURIComponent(product.sku)}`;
+  const hasImage = isValidImageSrc(product.productImage);
+
+  function handleAddToCart() {
+    addItem(product, 1);
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 1600);
+  }
+
   return (
     <article className="group bg-white border border-grey-200 hover:border-burgundy/40 transition-colors flex flex-col">
       <div className="relative aspect-square bg-grey-100 overflow-hidden">
-        <Link
-          href={`/products/${encodeURIComponent(product.sku)}`}
-          className="relative block w-full h-full"
-        >
-          <Image
-            src={product.productImage}
-            alt={product.productName}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-          />
+        <Link href={orderHref} className="relative block w-full h-full">
+          {hasImage ? (
+            <Image
+              src={product.productImage}
+              alt={product.productName}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+            />
+          ) : null}
         </Link>
         {hasDiscount && (
-          <span className="absolute bottom-3 right-3 bg-burgundy text-white text-xs font-bold px-2 py-1 uppercase tracking-wide">
+          <span className="absolute bottom-3 right-3 bg-action text-white text-xs font-bold px-2 py-1 uppercase tracking-wide">
             -{discountPercent}%
-          </span>
-        )}
-        {product.status === "Active" && (
-          <span className="absolute top-3 right-3 bg-white border border-grey-200 text-grey-700 text-[10px] font-medium px-2 py-1 uppercase tracking-wide">
-            {product.color}
           </span>
         )}
       </div>
@@ -44,17 +55,14 @@ export default function ProductCard({ product }) {
         <p className="text-[10px] text-grey-500 uppercase tracking-widest mb-1">
           SKU: {product.sku}
         </p>
-        <Link href={`/products/${encodeURIComponent(product.sku)}`}>
-          <h3 className="font-serif text-base font-semibold text-foreground leading-snug mb-2 group-hover:text-burgundy transition-colors">
+        <Link href={orderHref}>
+          <h3 className="font-serif text-base font-semibold text-foreground leading-snug mb-4 group-hover:text-burgundy transition-colors">
             {product.productName}
           </h3>
         </Link>
-        <p className="text-sm text-grey-500 leading-relaxed line-clamp-2 mb-4 flex-1">
-          {product.productDescription}
-        </p>
 
-        <div className="flex items-end justify-between gap-2 mt-auto pt-3 border-t border-grey-100">
-          <div>
+        <div className="mt-auto pt-3 border-t border-grey-100">
+          <div className="mb-3">
             {hasDiscount ? (
               <>
                 <p className="text-lg font-bold text-burgundy">
@@ -70,12 +78,22 @@ export default function ProductCard({ product }) {
               </p>
             )}
           </div>
-          <Link
-            href={`/products/${encodeURIComponent(product.sku)}`}
-            className="px-4 py-2 bg-burgundy text-white text-xs font-semibold uppercase tracking-wider hover:bg-burgundy-dark transition-colors shrink-0"
-          >
-            View Varieties
-          </Link>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="flex-1 px-3 py-2 border-2 border-burgundy text-burgundy text-xs font-semibold uppercase tracking-wider hover:bg-action hover:text-white transition-colors"
+            >
+              {added ? "Added ✓" : "Add to Cart"}
+            </button>
+            <Link
+              href={orderHref}
+              className="flex-1 text-center px-3 py-2 bg-action text-white text-xs font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors"
+            >
+              Order
+            </Link>
+          </div>
         </div>
       </div>
     </article>
