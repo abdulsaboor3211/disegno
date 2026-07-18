@@ -81,6 +81,16 @@ function getPosterImage(row) {
   );
 }
 
+function getExtraImages(row) {
+  return {
+    img1: row.img1 || row.Img1 || row.IMG1 || "",
+    img2: row.img2 || row.Img2 || row.IMG2 || "",
+    img3: row.img3 || row.Img3 || row.IMG3 || "",
+    img4: row.img4 || row.Img4 || row.IMG4 || "",
+    img5: row.img5 || row.Img5 || row.IMG5 || "",
+  };
+}
+
 async function fetchSheetRows(sheetName) {
   const response = await fetch(csvUrl(sheetName), {
     next: { revalidate: 60 },
@@ -100,6 +110,7 @@ export async function getProducts() {
     const products = rows
       .map((row) => {
         const posterRaw = getPosterImage(row);
+        const extraImages = getExtraImages(row);
 
         return {
           sku: row.SKU,
@@ -112,6 +123,15 @@ export async function getProducts() {
             : "",
           posterImage: isValidImageSrc(posterRaw)
             ? normalizeImageUrl(posterRaw)
+            : "",
+          img1: isValidImageSrc(extraImages.img1)
+            ? normalizeImageUrl(extraImages.img1)
+            : "",
+          img2: isValidImageSrc(extraImages.img2)
+            ? normalizeImageUrl(extraImages.img2)
+            : "",
+          img3: isValidImageSrc(extraImages.img3)
+            ? normalizeImageUrl(extraImages.img3)
             : "",
           status: row.Status || "Active",
         };

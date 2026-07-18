@@ -11,6 +11,11 @@ export const fallbackProducts = [
       "Hand-stitched burgundy leather kheri with contrast cream stitching. A timeless Peshawari classic for weddings and formal gatherings.",
     productImage: PRODUCT_IMAGE,
     posterImage: "",
+    img1: "",
+    img2: "",
+    img3: "",
+    img4: "",
+    img5: "",
     status: "Active",
   },
   {
@@ -22,6 +27,9 @@ export const fallbackProducts = [
       "Rich chocolate brown leather with a squared toe and sturdy ankle strap. Comfortable for all-day wear.",
     productImage: PRODUCT_IMAGE,
     posterImage: "",
+    img1: "",
+    img2: "",
+    img3: "",
     status: "Active",
   },
   {
@@ -33,6 +41,9 @@ export const fallbackProducts = [
       "Sleek black leather finish with brass buckle detail. Perfect for pairing with shalwar kameez or modern casual wear.",
     productImage: PRODUCT_IMAGE,
     posterImage: "",
+    img1: "",
+    img2: "",
+    img3: "",
     status: "Active",
   },
   {
@@ -44,6 +55,9 @@ export const fallbackProducts = [
       "Warm tan leather inspired by traditional Peshawari craftsmanship. Lightweight sole for everyday comfort.",
     productImage: PRODUCT_IMAGE,
     posterImage: "",
+    img1: "",
+    img2: "",
+    img3: "",
     status: "Active",
   },
 ];

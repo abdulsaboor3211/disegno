@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 
 const navLinks = [
@@ -13,6 +14,7 @@ const navLinks = [
 
 export default function Header() {
   const { itemCount } = useCart();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-grey-200">
@@ -73,25 +75,58 @@ export default function Header() {
             </Link>
             <button
               type="button"
-              aria-label="Menu"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
               className="md:hidden p-2 text-grey-700"
+              onClick={() => setMenuOpen((prev) => !prev)}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="square"
-              >
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              {menuOpen ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="square"
+                >
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="square"
+                >
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
       </div>
+
+      {menuOpen && (
+        <nav className="md:hidden border-t border-grey-200 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="block px-3 py-3 text-sm font-medium text-grey-700 hover:text-burgundy hover:bg-grey-100 transition-colors uppercase tracking-wide"
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      )}
     </header>
   );
 }

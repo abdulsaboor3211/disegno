@@ -29,6 +29,26 @@ export default function OrderForm({ product = null, fromCart = false }) {
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
   const [orderId, setOrderId] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const productImages = useMemo(() => {
+    if (!product || fromCart) return [];
+    const seen = new Set();
+    const images = [];
+    const addImage = (src) => {
+      if (isValidImageSrc(src) && !seen.has(src)) {
+        seen.add(src);
+        images.push(src);
+      }
+    };
+    addImage(product.productImage);
+    addImage(product.img1);
+    addImage(product.img2);
+    addImage(product.img3);
+    addImage(product.img4);
+    addImage(product.img5);
+    return images;
+  }, [product, fromCart]);
 
   useEffect(() => {
     if (!fromCart) {
@@ -155,6 +175,7 @@ export default function OrderForm({ product = null, fromCart = false }) {
       setColor(DEFAULT_PRODUCT_COLOR);
       setCartSizes({});
       setCartColors({});
+      setSelectedImage(null);
 
       if (fromCart) {
         clearCart();
@@ -299,18 +320,46 @@ export default function OrderForm({ product = null, fromCart = false }) {
             </div>
           ) : (
             <>
-              <div className="relative aspect-square bg-grey-100 mb-5 overflow-hidden">
-                {isValidImageSrc(product.productImage) ? (
-                  <Image
-                    src={product.productImage}
-                    alt={product.productName}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-contain p-6"
-                    priority
-                  />
-                ) : null}
+              <div className="relative aspect-[4/3] bg-grey-100 mb-5 overflow-hidden">
+                {(() => {
+                  const displayImage = selectedImage || productImages[0];
+                  return isValidImageSrc(displayImage) ? (
+                    <Image
+                      src={displayImage}
+                      alt={product.productName}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="object-contain p-6"
+                      priority
+                    />
+                  ) : null;
+                })()}
               </div>
+
+              {productImages.length > 1 && (
+                <div className="flex justify-center gap-2 mb-5">
+                  {productImages.map((img, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedImage(img)}
+                      className={`relative w-16 h-16 border-2 overflow-hidden bg-grey-100 ${
+                        (selectedImage || productImages[0]) === img
+                          ? "border-burgundy"
+                          : "border-grey-200 hover:border-grey-400"
+                      }`}
+                    >
+                      <Image
+                        src={img}
+                        alt={`${product.productName} ${idx + 1}`}
+                        fill
+                        sizes="64px"
+                        className="object-contain p-1"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
                 {product.productName}

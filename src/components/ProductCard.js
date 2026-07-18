@@ -32,7 +32,7 @@ export default function ProductCard({ product }) {
 
   return (
     <article className="group bg-white border border-grey-200 hover:border-burgundy/40 transition-colors flex flex-col">
-      <div className="relative aspect-square bg-grey-100 overflow-hidden">
+      <div className="relative aspect-[4/3] bg-grey-100 overflow-hidden">
         <Link href={orderHref} className="relative block w-full h-full">
           {hasImage ? (
             <Image
@@ -91,7 +91,7 @@ export default function ProductCard({ product }) {
               href={orderHref}
               className="flex-1 text-center px-3 py-2 bg-action text-white text-xs font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors"
             >
-              Order
+              Order Now
             </Link>
           </div>
         </div>

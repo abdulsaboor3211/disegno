@@ -48,7 +48,7 @@ export async function POST(request) {
 
     const apiKey = process.env.RESEND_API_KEY;
     const fromEmail =
-      process.env.RESEND_FROM_EMAIL || "Disegno Orders <onboarding@resend.dev>";
+      process.env.RESEND_FROM_EMAIL || "Disegno <disegnoproducts@gmail.com>";
     const toEmail = process.env.ORDER_EMAIL_TO;
 
     if (

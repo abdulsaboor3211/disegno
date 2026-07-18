@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import Banner from "@/components/Banner";
 import Hero from "@/components/Hero";
 import ProductsSection from "@/components/ProductsSection";
 import HeritageSection from "@/components/HeritageSection";
@@ -9,6 +10,7 @@ export default function Home() {
     <>
       <Header />
       <main>
+        <Banner />
         <Hero />
         <ProductsSection />
         <HeritageSection />

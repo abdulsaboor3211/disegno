@@ -7,19 +7,32 @@ export default function Hero() {
   return (
     <section className="relative bg-cream border-b border-grey-200 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-12 sm:py-16 lg:py-20">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-8 pb-10">
           <div className="text-center lg:text-left">
-            <p className="text-burgundy text-xs sm:text-sm font-semibold uppercase tracking-[0.25em] mb-4">
-              Handmade in Peshawar
+            <p className="text-burgundy text-[10px] sm:text-sm font-semibold uppercase mb-3 sm:mb-4">
+              Handmade Traditional Peshawari Chappal
             </p>
-            <h1 className="font-sans text-4xl sm:text-5xl lg:text-6xl font-semibold text-foreground leading-tight mb-6">
-              Peshawari Kheri
-              <span className="block text-burgundy mt-1">Crafted with Heritage</span>
+            <h1 className="font-sans text-2xl sm:text-4xl lg:text-6xl font-semibold text-foreground leading-tight sm:leading-tight lg:leading-tight mb-4 sm:mb-6">
+              Where Heritage Meets{" "}
+              <span className="text-burgundy">Modern Craftsmanship</span>
             </h1>
-            <p className="text-grey-700 text-base sm:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0 mb-8">
-              The Peshawari Kheri is a traditional shoe that showcases the rich
-              culture of Peshawar. Handmade with care, these shoes symbolize
-              craftsmanship and elegance — stylish, comfortable, and long-lasting.
+            <p className="text-grey-700 text-sm sm:text-base lg:text-lg leading-snug sm:leading-relaxed max-w-lg mx-auto lg:mx-0 mb-4 sm:mb-6">
+              Rooted in the rich traditions of Peshawar, the Peshawari Chappal
+              has been a symbol of culture, durability, and timeless style for
+              generations. At Disegno, every pair is handcrafted by experienced
+              artisans using premium leather and traditional techniques that
+              have been passed down through generations.
+            </p>
+            <p className="text-grey-700 text-sm sm:text-base lg:text-lg leading-snug sm:leading-relaxed max-w-lg mx-auto lg:mx-0 mb-5 sm:mb-8">
+              While preserving its authentic heritage, we thoughtfully refine each
+              design with modern comfort, premium materials, and precise
+              craftsmanship. From classic handmade styles to contemporary
+              interpretations, our collection is created for those who appreciate
+              tradition without compromising on quality or everyday comfort.
+            </p>
+            <p className="text-grey-600 text-xs sm:text-sm italic leading-snug sm:leading-relaxed max-w-lg mx-auto lg:mx-0 mb-6 sm:mb-8">
+              Every step in a Disegno Peshawari Chappal carries a story of
+              craftsmanship, culture, and excellence.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
               <a
@@ -34,28 +47,6 @@ export default function Hero() {
               >
                 Our Story
               </a>
-            </div>
-            <div className="flex items-center justify-center lg:justify-start gap-8 mt-10 pt-8 border-t border-grey-200">
-              <div>
-                <p className="font-serif text-2xl font-semibold text-burgundy">100%</p>
-                <p className="text-xs text-grey-500 uppercase tracking-wide mt-0.5">
-                  Genuine Leather
-                </p>
-              </div>
-              <div className="w-px h-10 bg-grey-200" />
-              <div>
-                <p className="font-serif text-2xl font-semibold text-burgundy">Hand</p>
-                <p className="text-xs text-grey-500 uppercase tracking-wide mt-0.5">
-                  Stitched
-                </p>
-              </div>
-              <div className="w-px h-10 bg-grey-200" />
-              <div>
-                <p className="font-serif text-2xl font-semibold text-burgundy">PK</p>
-                <p className="text-xs text-grey-500 uppercase tracking-wide mt-0.5">
-                  Nationwide
-                </p>
-              </div>
             </div>
           </div>
 
@@ -82,6 +73,28 @@ export default function Hero() {
                     className="w-full h-auto object-contain"
                     priority
                   />
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-6 sm:gap-8 mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-grey-200">
+                <div>
+                  <p className="font-serif text-xl sm:text-2xl font-semibold text-burgundy">Authentic</p>
+                  <p className="text-[10px] sm:text-xs text-grey-500 uppercase tracking-wide mt-0.5">
+                    Handmade
+                  </p>
+                </div>
+                <div className="w-px h-8 sm:h-10 bg-grey-200" />
+                <div>
+                  <p className="font-serif text-xl sm:text-2xl font-semibold text-burgundy">Premium</p>
+                  <p className="text-[10px] sm:text-xs text-grey-500 uppercase tracking-wide mt-0.5">
+                    Leather
+                  </p>
+                </div>
+                <div className="w-px h-8 sm:h-10 bg-grey-200" />
+                <div>
+                  <p className="font-serif text-xl sm:text-2xl font-semibold text-burgundy">Timeless</p>
+                  <p className="text-[10px] sm:text-xs text-grey-500 uppercase tracking-wide mt-0.5">
+                    Design
+                  </p>
                 </div>
               </div>
             </div>
