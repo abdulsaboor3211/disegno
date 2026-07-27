@@ -1,22 +1,19 @@
 import Image from "next/image";
 
-const BANNER_IMAGE = "/home-banner-new.webp";
+const BANNER_IMAGE = "/home-banner-2.webp";
 
 export default function Banner() {
   return (
     <section className="relative w-full overflow-hidden">
-      <div className="relative w-full sm:h-[60vh] lg:h-[72vh] xl:h-[78vh]">
-        <div className="relative w-full aspect-video sm:aspect-auto sm:h-full">
-          <Image
-            src={BANNER_IMAGE}
-            alt="Disegno Banner"
-            fill
-            className="object-contain sm:object-cover"
-            priority
-            sizes="100vw"
-          />
-        </div>
-      </div>
+      <Image
+        src={BANNER_IMAGE}
+        alt="Disegno Banner"
+        width={1920}
+        height={800}
+        className="w-full h-auto"
+        priority
+        sizes="100vw"
+      />
     </section>
   );
 }

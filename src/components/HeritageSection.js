@@ -24,7 +24,7 @@ export default function HeritageSection() {
               {hasImage ? (
                 <Image
                   src={HERITAGE_IMAGE}
-                  alt="Handcrafted Peshawari Kheri detail"
+                  alt="Handcrafted Peshawari Chappal detail"
                   width={720}
                   height={560}
                   className="w-full h-auto object-contain"
@@ -49,13 +49,13 @@ export default function HeritageSection() {
             </h2>
             <div className="space-y-4 text-grey-700 text-sm sm:text-base leading-relaxed">
               <p>
-                The Peshawari Kheri is a traditional shoe that showcases the rich
+                The Peshawari Chappal is a traditional shoe that showcases the rich
                 culture of Peshawar. Handmade with care, these shoes symbolize
                 craftsmanship and elegance. They are stylish, comfortable, and
                 long-lasting, making them a popular choice for many.
               </p>
               <p>
-                Disegno Kheri Chappal is crafted from high-quality leather, perfect
+                Disegno Chappal Chappal is crafted from high-quality leather, perfect
                 for everyday wear and special occasions. Whether you&apos;re
                 attending a family gathering or enjoying a casual outing with
                 friends, this can elevate any outfit and add a touch of

@@ -7,7 +7,7 @@ import { getProductBySku } from "@/lib/googleSheets";
 
 export const metadata = {
   title: "Place Order | Disegno",
-  description: "Confirm your Peshawari Kheri order and delivery details.",
+  description: "Confirm your Peshawari Chappal order and delivery details.",
 };
 
 export default async function OrderPage({ searchParams }) {

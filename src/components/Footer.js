@@ -23,7 +23,7 @@ export default function Footer() {
               />
             </Link>
             <p className="text-sm text-grey-300 leading-relaxed">
-              Premium handmade Peshawari Kheri chappals. Tradition meets
+              Premium handmade Peshawari Chappal chappals. Tradition meets
               elegance in every stitch.
             </p>
           </div>
@@ -132,7 +132,7 @@ export default function Footer() {
 
         <div className="mt-12 pt-8 border-t border-grey-700 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-grey-500">
-            &copy; {new Date().getFullYear()} Disegno Kheri. All rights reserved.
+            &copy; {new Date().getFullYear()} Disegno Chappal. All rights reserved.
           </p>
           <div className="flex gap-4 text-xs text-grey-500">
             <a href="#" className="hover:text-white transition-colors">

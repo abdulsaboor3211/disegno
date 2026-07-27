@@ -67,7 +67,7 @@ export default function Hero() {
                 <div className="relative bg-white border border-grey-200 p-2 sm:p-3">
                   <Image
                     src={HERO_IMAGE}
-                    alt="Peshawari Kheri - Burgundy leather chappal"
+                    alt="Peshawari Chappal - Burgundy leather chappal"
                     width={720}
                     height={720}
                     className="w-full h-auto object-contain"
