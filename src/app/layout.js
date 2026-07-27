@@ -14,7 +14,7 @@ export const metadata = {
   description:
     "Premium handmade Peshawari Chappal chappals crafted from high-quality leather. Traditional Pakistani footwear for everyday wear and special occasions.",
   icons: {
-    icon: "/fav-icon.jpeg",
+    icon: "/favicon.png",
   },
 };
 

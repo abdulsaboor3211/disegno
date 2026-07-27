@@ -1,11 +1,11 @@
 export const PRODUCT_SIZES = [
-  "US 8 / EU 37 / PAK 7",
-  "US 9 / EU 38 / PAK 8",
-  "US 10 / EU 39 / PAK 9",
-  "US 11 / EU 40 / PAK 10",
-  "US 12 / EU 41 / PAK 11",
-  "US 13 / EU 42 / PAK 12",
-  "US 14 / EU 43 / PAK 13",
+  "UK 5 / EU 39 / US 6 / PAK 7 / 24.5 cm",
+  "UK 6 / EU 40 / US 7 / PAK 8 / 25.1 cm",
+  "UK 7 / EU 41 / US 8 / PAK 9 / 25.7 cm",
+  "UK 8 / EU 42 / US 9 / PAK 10 / 26.3 cm",
+  "UK 9 / EU 43 / US 10 / PAK 11 / 26.9 cm",
+  "UK 10 / EU 44 / US 11 / PAK 12 / 27.5 cm",
+  "UK 11 / EU 45 / US 12 / PAK 13 / 28.1 cm",
 ];
 
 export const DEFAULT_PRODUCT_SIZE = PRODUCT_SIZES[0];
