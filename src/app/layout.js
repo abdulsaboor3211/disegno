@@ -10,9 +10,12 @@ const manrope = Manrope({
 });
 
 export const metadata = {
-  title: "Disegno Kheri | Handmade Peshawari Chappals",
+  title: "Disegno Chappal | Handmade Peshawari Chappals",
   description:
-    "Premium handmade Peshawari Kheri chappals crafted from high-quality leather. Traditional Pakistani footwear for everyday wear and special occasions.",
+    "Premium handmade Peshawari Chappal chappals crafted from high-quality leather. Traditional Pakistani footwear for everyday wear and special occasions.",
+  icons: {
+    icon: "/fav-icon.jpeg",
+  },
 };
 
 export default function RootLayout({ children }) {

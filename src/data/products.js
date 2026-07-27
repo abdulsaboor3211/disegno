@@ -4,11 +4,11 @@ export const PRODUCT_IMAGE =
 export const fallbackProducts = [
   {
     sku: "BK-001",
-    productName: "Classic Burgundy Peshawari Kheri",
+    productName: "Classic Burgundy Peshawari Chappal",
     productPrice: 5500,
     discountPrice: 4999,
     productDescription:
-      "Hand-stitched burgundy leather kheri with contrast cream stitching. A timeless Peshawari classic for weddings and formal gatherings.",
+      "Hand-stitched burgundy leather Chappal with contrast cream stitching. A timeless Peshawari classic for weddings and formal gatherings.",
     productImage: PRODUCT_IMAGE,
     posterImage: "",
     img1: "",
@@ -20,7 +20,7 @@ export const fallbackProducts = [
   },
   {
     sku: "BK-002",
-    productName: "Traditional Brown Disegno Kheri",
+    productName: "Traditional Brown Disegno Chappal",
     productPrice: 4800,
     discountPrice: 4299,
     productDescription:
@@ -48,7 +48,7 @@ export const fallbackProducts = [
   },
   {
     sku: "BK-004",
-    productName: "Tan Heritage Kheri",
+    productName: "Tan Heritage Chappal",
     productPrice: 4600,
     discountPrice: 3999,
     productDescription:

@@ -15,7 +15,7 @@ export default async function ProductsSection() {
             Shop Peshawari Chappal
           </h2>
           <p className="text-grey-500 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
-            Disegno Kheri Chappal is crafted from high-quality leather, perfect for
+            Disegno Chappal Chappal is crafted from high-quality leather, perfect for
             everyday wear and special occasions. Each pair reflects our
             commitment to comfort, style, and cultural heritage.
           </p>
