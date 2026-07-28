@@ -49,13 +49,16 @@ export async function POST(request) {
     const apiKey = process.env.RESEND_API_KEY;
     const fromEmail =
       process.env.RESEND_FROM_EMAIL || "Disegno <disegnoproducts@gmail.com>";
-    const toEmail = process.env.ORDER_EMAIL_TO;
+
+    const toEmails = (process.env.ORDER_EMAIL_TO || "")
+      .split(",")
+      .map((e) => e.trim())
+      .filter((e) => e && e !== "you@example.com");
 
     if (
       !apiKey ||
       apiKey === "re_placeholder" ||
-      !toEmail ||
-      toEmail === "you@example.com"
+      toEmails.length === 0
     ) {
       console.info("[contact:preview]", payload);
       return NextResponse.json({
@@ -71,7 +74,7 @@ export async function POST(request) {
       from: fromEmail.includes("<")
         ? fromEmail
         : `Disegno Contact <${fromEmail}>`,
-      to: [toEmail],
+      to: toEmails,
       subject: `New contact message${name ? ` — ${name}` : ""}`,
       html: `
         <div style="font-family: Arial, sans-serif; color: #2a2a2a; line-height: 1.5;">
