@@ -234,6 +234,8 @@ export async function POST(request) {
 
     if (error) {
       console.error("[order:resend]", error);
+      console.log(fromEmail)
+      console.log(toEmail)
       return NextResponse.json(
         { error: error.message || "Failed to send order email" },
         { status: 502 }
