@@ -72,22 +72,16 @@ function toNumber(value) {
 }
 
 function getPosterImage(row) {
-  return (
-    row["poster-Image"] ||
-    row["Poster-Image"] ||
-    row["poster-image"] ||
-    row.PosterImage ||
-    ""
-  );
+  return row["poster-Image"] || "";
 }
 
 function getExtraImages(row) {
   return {
-    img1: row.img1 || row.Img1 || row.IMG1 || "",
-    img2: row.img2 || row.Img2 || row.IMG2 || "",
-    img3: row.img3 || row.Img3 || row.IMG3 || "",
-    img4: row.img4 || row.Img4 || row.IMG4 || "",
-    img5: row.img5 || row.Img5 || row.IMG5 || "",
+    img1: row.img1 || "",
+    img2: row.img2 || "",
+    img3: row.img3 || "",
+    img4: row.img4 || "",
+    img5: row.img5 || "",
   };
 }
 
@@ -106,7 +100,7 @@ async function fetchSheetRows(sheetName) {
 
 export async function getProducts() {
   try {
-    const rows = await fetchSheetRows("sheet1");
+    const rows = await fetchSheetRows("Sheet1");
     const products = rows
       .map((row) => {
         const posterRaw = getPosterImage(row);
@@ -114,12 +108,12 @@ export async function getProducts() {
 
         return {
           sku: row.SKU,
-          productName: row.ProdutName,
-          productPrice: toNumber(row.ProductPrice),
-          discountPrice: toNumber(row.DiscountPrice),
-          productDescription: row.ProductDescription || "",
-          productImage: isValidImageSrc(row.ProductImage)
-            ? normalizeImageUrl(row.ProductImage)
+          productName: row["Produt Name"],
+          productPrice: toNumber(row["Product Price"]),
+          discountPrice: toNumber(row["Discount Price"]),
+          productDescription: row["Product Description"] || "",
+          productImage: isValidImageSrc(row["Product Image"])
+            ? normalizeImageUrl(row["Product Image"])
             : "",
           posterImage: isValidImageSrc(posterRaw)
             ? normalizeImageUrl(posterRaw)
@@ -133,6 +127,12 @@ export async function getProducts() {
           img3: isValidImageSrc(extraImages.img3)
             ? normalizeImageUrl(extraImages.img3)
             : "",
+          img4: isValidImageSrc(extraImages.img4)
+            ? normalizeImageUrl(extraImages.img4)
+            : "",
+          img5: isValidImageSrc(extraImages.img5)
+            ? normalizeImageUrl(extraImages.img5)
+            : "",
           status: row.Status || "Active",
         };
       })
@@ -142,10 +142,9 @@ export async function getProducts() {
           product.productName &&
           product.status.toLowerCase() !== "inactive"
       );
-
     return products.length > 0 ? products : fallbackProducts;
   } catch (error) {
-    console.warn(error.message);
+    console.error(error.message);
     return fallbackProducts;
   }
 }
