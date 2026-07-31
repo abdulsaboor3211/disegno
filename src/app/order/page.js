@@ -4,6 +4,14 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import OrderForm from "@/components/OrderForm";
 import { getProductBySku } from "@/lib/googleSheets";
+import JsonLd from "@/components/JsonLd";
+const orderSchema = {
+  "@context": "https://schema.org",
+  "@type": "CheckoutPage",
+  name: "Place Order | Disegno",
+  description: "Confirm your Peshawari Chappal order and delivery details.",
+  url: "https://disegnoproducts.com/order",
+};
 
 export const metadata = {
   title: "Place Order | Disegno",
@@ -17,7 +25,9 @@ export default async function OrderPage({ searchParams }) {
 
   if (fromCart) {
     return (
+      
       <>
+      <JsonLd data={orderSchema} />
         <Header />
         <main className="bg-cream border-b border-grey-200">
           <section className="py-10 sm:py-14">
@@ -48,6 +58,7 @@ export default async function OrderPage({ searchParams }) {
   if (!sku) {
     return (
       <>
+      <JsonLd data={orderSchema} />
         <Header />
         <main className="py-16 sm:py-24 bg-cream">
           <div className="max-w-xl mx-auto px-4 text-center">
@@ -87,6 +98,7 @@ export default async function OrderPage({ searchParams }) {
 
   return (
     <>
+    <JsonLd data={orderSchema} />
       <Header />
       <main className="bg-cream border-b border-grey-200">
         <section className="py-10 sm:py-14">

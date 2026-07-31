@@ -2,6 +2,14 @@ import Link from "next/link";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import CartPageContent from "@/components/CartPageContent";
+import JsonLd from "@/components/JsonLd";
+const cartSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Cart",
+  description: "Review items in your cart before placing an order.",
+  url: "https://disegnoproducts.com/cart",
+};
 
 export const metadata = {
   title: "Cart | Disegno",
@@ -11,6 +19,7 @@ export const metadata = {
 export default function CartPage() {
   return (
     <>
+     <JsonLd data={cartSchema} />
       <Header />
       <main className="bg-cream border-b border-grey-200">
         <section className="py-10 sm:py-14">
