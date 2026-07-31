@@ -44,6 +44,8 @@ export default function RootLayout({ children }) {
             `,
           }}
         />
+      </head>
+      <body className="min-h-full flex flex-col">
         <noscript>
           <img
             height="1"
@@ -53,8 +55,6 @@ export default function RootLayout({ children }) {
             alt=""
           />
         </noscript>
-      </head>
-      <body className="min-h-full flex flex-col">
         <CartProvider>
           {children}
           <WhatsAppFloat />
