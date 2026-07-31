@@ -1,6 +1,5 @@
 import { Manrope } from "next/font/google";
 import Script from "next/script";
-import Image from "next/image";
 import { CartProvider } from "@/context/CartContext";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import "./globals.css";
@@ -46,7 +45,7 @@ export default function RootLayout({ children }) {
           }}
         />
         <noscript>
-          <Image
+          <img
             height="1"
             width="1"
             style={{ display: "none" }}
