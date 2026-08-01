@@ -10,11 +10,18 @@ const cartSchema = {
   description: "Review items in your cart before placing an order.",
   url: "https://disegnoproducts.com/cart",
 };
-
 export const metadata = {
-  title: "Cart | Disegno",
+  title: "Cart",
   description: "Review items in your cart before placing an order.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
+//export const metadata = {
+ // title: "Cart | Disegno",
+ // description: "Review items in your cart before placing an order.",
+//};
 
 export default function CartPage() {
   return (
