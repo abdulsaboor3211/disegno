@@ -13,10 +13,6 @@ const orderSchema = {
   url: "https://disegnoproducts.com/order",
 };
 
-//export const metadata = {
- // title: "Place Order | Disegno",
- // description: "Confirm your Peshawari Chappal order and delivery details.",
-//};
 export const metadata = {
   title: "Place Order",
   description: "Confirm your Peshawari Chappal order and delivery details.",
