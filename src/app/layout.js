@@ -50,6 +50,22 @@ export default function RootLayout({ children }) {
       className={`${manrope.variable} h-full antialiased`}
     >
       <head>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-7JCJ3HYHSK"
+          strategy="afterInteractive"
+        />
+
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){window.dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-7JCJ3HYHSK');
+          `}
+        </Script>
+
+        {/* Meta Pixel */}
         <Script
           id="meta-pixel"
           strategy="afterInteractive"
@@ -69,6 +85,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
+
       <body className="min-h-full flex flex-col">
         <noscript>
           <img
@@ -79,6 +96,7 @@ export default function RootLayout({ children }) {
             alt=""
           />
         </noscript>
+
         <CartProvider>
           {children}
           <WhatsAppFloat />
@@ -87,4 +105,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-
