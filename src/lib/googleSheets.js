@@ -76,15 +76,22 @@ function getPosterImage(row) {
 }
 
 function getExtraImages(row) {
-  return {
-    img1: row.img1 || "",
-    img2: row.img2 || "",
-    img3: row.img3 || "",
-    img4: row.img4 || "",
-    img5: row.img5 || "",
-  };
-}
+  const images = {};
 
+  for (let i = 1; i <= 9; i++) {
+    images[`img${i}`] = row[`img${i}`] || "";
+  }
+
+  return images;
+}
+function parseAvailableSizes(value) {
+  if (!value) return [];
+
+  return value
+    .split(",")
+    .map((size) => size.trim())
+    .filter(Boolean);
+}
 async function fetchSheetRows(sheetName) {
   const response = await fetch(csvUrl(sheetName), {
     next: { revalidate: 60 },
@@ -106,33 +113,28 @@ export async function getProducts() {
         const posterRaw = getPosterImage(row);
         const extraImages = getExtraImages(row);
 
+        const normalizedImages = {};
+
+        Object.entries(extraImages).forEach(([key, value]) => {
+          normalizedImages[key] = isValidImageSrc(value)
+            ? normalizeImageUrl(value)
+            : "";
+        });
+
         return {
           sku: row.SKU,
           productName: row["Produt Name"],
           productPrice: toNumber(row["Product Price"]),
           discountPrice: toNumber(row["Discount Price"]),
           productDescription: row["Product Description"] || "",
+          availableSizes: parseAvailableSizes(row["sizes"]),
           productImage: isValidImageSrc(row["Product Image"])
             ? normalizeImageUrl(row["Product Image"])
             : "",
           posterImage: isValidImageSrc(posterRaw)
             ? normalizeImageUrl(posterRaw)
             : "",
-          img1: isValidImageSrc(extraImages.img1)
-            ? normalizeImageUrl(extraImages.img1)
-            : "",
-          img2: isValidImageSrc(extraImages.img2)
-            ? normalizeImageUrl(extraImages.img2)
-            : "",
-          img3: isValidImageSrc(extraImages.img3)
-            ? normalizeImageUrl(extraImages.img3)
-            : "",
-          img4: isValidImageSrc(extraImages.img4)
-            ? normalizeImageUrl(extraImages.img4)
-            : "",
-          img5: isValidImageSrc(extraImages.img5)
-            ? normalizeImageUrl(extraImages.img5)
-            : "",
+          ...normalizedImages,
           status: row.Status || "Active",
         };
       })
