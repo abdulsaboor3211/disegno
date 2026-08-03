@@ -42,11 +42,10 @@ export default function OrderForm({ product = null, fromCart = false }) {
       }
     };
     addImage(product.productImage);
-    addImage(product.img1);
-    addImage(product.img2);
-    addImage(product.img3);
-    addImage(product.img4);
-    addImage(product.img5);
+
+    for (let i = 1; i <= 9; i++) {
+      addImage(product[`img${i}`]);
+    }
     return images;
   }, [product, fromCart]);
 
@@ -94,22 +93,22 @@ export default function OrderForm({ product = null, fromCart = false }) {
 
   const orderItems = fromCart
     ? cartItems.map((item) => ({
-        ...item,
-        size: cartSizes[item.sku] || DEFAULT_PRODUCT_SIZE,
-        color: cartColors[item.sku] || DEFAULT_PRODUCT_COLOR,
-      }))
+      ...item,
+      size: cartSizes[item.sku] || DEFAULT_PRODUCT_SIZE,
+      color: cartColors[item.sku] || DEFAULT_PRODUCT_COLOR,
+    }))
     : product
       ? [
-          {
-            sku: product.sku,
-            productName: product.productName,
-            productImage: product.productImage,
-            unitPrice,
-            quantity,
-            size,
-            color,
-          },
-        ]
+        {
+          sku: product.sku,
+          productName: product.productName,
+          productImage: product.productImage,
+          unitPrice,
+          quantity,
+          size,
+          color,
+        },
+      ]
       : [];
 
   const displayTotal = fromCart ? subtotal : singleTotal;
@@ -343,11 +342,10 @@ export default function OrderForm({ product = null, fromCart = false }) {
                       key={idx}
                       type="button"
                       onClick={() => setSelectedImage(img)}
-                      className={`relative w-16 h-16 border-2 overflow-hidden bg-grey-100 ${
-                        (selectedImage || productImages[0]) === img
+                      className={`relative w-16 h-16 border-2 overflow-hidden bg-grey-100 ${(selectedImage || productImages[0]) === img
                           ? "border-burgundy"
                           : "border-grey-200 hover:border-grey-400"
-                      }`}
+                        }`}
                     >
                       <Image
                         src={img}
