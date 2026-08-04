@@ -13,6 +13,7 @@ export default function ProductCard({ product }) {
 
   const hasDiscount =
     product.discountPrice && product.discountPrice < product.productPrice;
+
   const discountPercent = hasDiscount
     ? Math.round(
         ((product.productPrice - product.discountPrice) /
@@ -21,6 +22,7 @@ export default function ProductCard({ product }) {
       )
     : 0;
 
+  const productHref = `/products/${encodeURIComponent(product.sku)}`;
   const orderHref = `/order?sku=${encodeURIComponent(product.sku)}`;
   const hasImage = isValidImageSrc(product.productImage);
 
@@ -33,7 +35,7 @@ export default function ProductCard({ product }) {
   return (
     <article className="group bg-white border border-grey-200 hover:border-burgundy/40 transition-colors flex flex-col">
       <div className="relative aspect-[4/3] bg-grey-100 overflow-hidden">
-        <Link href={orderHref} className="relative block w-full h-full">
+        <Link href={productHref} className="relative block w-full h-full">
           {hasImage ? (
             <Image
               src={product.productImage}
@@ -44,6 +46,7 @@ export default function ProductCard({ product }) {
             />
           ) : null}
         </Link>
+
         {hasDiscount && (
           <span className="absolute bottom-3 right-3 bg-action text-white text-xs font-bold px-2 py-1 uppercase tracking-wide">
             -{discountPercent}%
@@ -55,7 +58,8 @@ export default function ProductCard({ product }) {
         <p className="text-[10px] text-grey-500 uppercase tracking-widest mb-1">
           SKU: {product.sku}
         </p>
-        <Link href={orderHref}>
+
+        <Link href={productHref}>
           <h3 className="font-serif text-base font-semibold text-foreground leading-snug mb-4 group-hover:text-burgundy transition-colors">
             {product.productName}
           </h3>
@@ -87,6 +91,7 @@ export default function ProductCard({ product }) {
             >
               {added ? "Added ✓" : "Add to Cart"}
             </button>
+
             <Link
               href={orderHref}
               className="flex-1 text-center px-3 py-2 bg-action text-white text-xs font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors"
