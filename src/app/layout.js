@@ -11,11 +11,35 @@ const manrope = Manrope({
 });
 
 export const metadata = {
-  title: "Disegno Chappal | Handmade Peshawari Chappals",
+  metadataBase: new URL("https://disegnoproducts.com"),
+
+  title: {
+    default: "Disegno | Handmade Peshawari Chappals",
+    template: "%s | Disegno",
+  },
+
   description:
-    "Premium handmade Peshawari Chappal chappals crafted from high-quality leather. Traditional Pakistani footwear for everyday wear and special occasions.",
+    "Shop premium handmade Peshawari chappals crafted from high-quality leather. Traditional Pakistani footwear designed for everyday wear and special occasions.",
+
   icons: {
     icon: "/favicon.png",
+  },
+
+  openGraph: {
+    title: "Disegno | Handmade Peshawari Chappals",
+    description:
+      "Shop premium handmade Peshawari chappals crafted from high-quality leather. Traditional Pakistani footwear designed for everyday wear and special occasions.",
+    url: "/",
+    siteName: "Disegno",
+    type: "website",
+    locale: "en_US",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Disegno | Handmade Peshawari Chappals",
+    description:
+      "Shop premium handmade Peshawari chappals crafted from high-quality leather. Traditional Pakistani footwear designed for everyday wear and special occasions.",
   },
 };
 
@@ -26,6 +50,22 @@ export default function RootLayout({ children }) {
       className={`${manrope.variable} h-full antialiased`}
     >
       <head>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-7JCJ3HYHSK"
+          strategy="afterInteractive"
+        />
+
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){window.dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-7JCJ3HYHSK');
+          `}
+        </Script>
+
+        {/* Meta Pixel */}
         <Script
           id="meta-pixel"
           strategy="afterInteractive"
@@ -45,6 +85,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
+
       <body className="min-h-full flex flex-col">
         <noscript>
           <img
@@ -55,6 +96,7 @@ export default function RootLayout({ children }) {
             alt=""
           />
         </noscript>
+
         <CartProvider>
           {children}
           <WhatsAppFloat />
@@ -63,4 +105,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-
