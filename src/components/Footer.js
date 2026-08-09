@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { FaWhatsapp } from "react-icons/fa";
 import {
   CONTACT_EMAIL,
   CONTACT_MAILTO,
@@ -110,23 +111,14 @@ export default function Footer() {
                   href={WHATSAPP_CHAT_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
+                  aria-label="WhatsApp"
+                  className="w-9 h-9 border border-grey-500 flex items-center justify-center hover:border-burgundy-light hover:text-burgundy-light transition-colors"
                 >
-                  {CONTACT_WHATSAPP_DISPLAY}
+                  <FaWhatsapp className="w-5 h-5" />
                 </a>
               </li>
             </ul>
-            <div className="flex gap-3 mt-5">
-              <a
-                href={WHATSAPP_CHAT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="WhatsApp"
-                className="w-9 h-9 border border-grey-500 flex items-center justify-center text-xs hover:border-burgundy-light hover:text-burgundy-light transition-colors"
-              >
-                W
-              </a>
-            </div>
+
           </div>
         </div>
 
