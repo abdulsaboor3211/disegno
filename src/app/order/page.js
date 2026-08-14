@@ -6,11 +6,22 @@ import Header from "@/components/Header";
 import OrderForm from "@/components/OrderForm";
 
 import { getProductBySku } from "@/lib/googleSheets";
+import JsonLd from "@/components/JsonLd";
+const orderSchema = {
+  "@context": "https://schema.org",
+  "@type": "CheckoutPage",
+  name: "Place Order | Disegno",
+  description: "Confirm your Peshawari Chappal order and delivery details.",
+  url: "https://disegnoproducts.com/order",
+};
 
 export const metadata = {
-  title: "Place Order | Disegno",
-  description:
-    "Confirm your Peshawari Chappal order and delivery details.",
+  title: "Place Order",
+  description: "Confirm your Peshawari Chappal order and delivery details.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function OrderPage({
@@ -32,7 +43,9 @@ export default async function OrderPage({
 
   if (fromCart) {
     return (
+
       <>
+        <JsonLd data={orderSchema} />
         <Header />
 
         <main className="bg-cream min-h-screen border-b border-grey-200">
@@ -72,11 +85,41 @@ export default async function OrderPage({
   // ==========================================
 
   if (!sku) {
-    notFound();
+    return (
+      <>
+        <JsonLd data={orderSchema} />
+        <Header />
+        <main className="py-16 sm:py-24 bg-cream">
+          <div className="max-w-xl mx-auto px-4 text-center">
+            <h1 className="font-serif text-3xl font-semibold text-foreground mb-4">
+              No product selected
+            </h1>
+            <p className="text-grey-700 mb-8">
+              Choose a product from the shop to place an order, or open your
+              cart.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/#products"
+                className="inline-flex items-center justify-center px-8 py-3.5 bg-action text-white text-sm font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors"
+              >
+                Browse products
+              </Link>
+              <Link
+                href="/cart"
+                className="inline-flex items-center justify-center px-8 py-3.5 border-2 border-grey-300 text-grey-700 text-sm font-semibold uppercase tracking-wider hover:border-burgundy hover:text-burgundy transition-colors"
+              >
+                View cart
+              </Link>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
   }
 
-  const product =
-    await getProductBySku(sku);
+  const product = await getProductBySku(sku);
 
   if (!product) {
     notFound();
@@ -102,6 +145,7 @@ export default async function OrderPage({
 
   return (
     <>
+      <JsonLd data={orderSchema} />
       <Header />
 
       <main className="bg-cream min-h-screen border-b border-grey-200">

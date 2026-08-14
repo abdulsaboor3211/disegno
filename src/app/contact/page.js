@@ -2,6 +2,7 @@ import Link from "next/link";
 import ContactForm from "@/components/ContactForm";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import JsonLd from "@/components/JsonLd";
 import {
   CONTACT_EMAIL,
   CONTACT_MAILTO,
@@ -10,14 +11,25 @@ import {
 } from "@/data/contact";
 
 export const metadata = {
-  title: "Contact | Disegno",
+  title: "Contact",
+  description: "Contact Disegno for orders, sizing help, and customer care.",
+};
+
+const contactPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  name: "Contact Disegno",
+  url: "https://disegnoproducts.com/contact",
   description: "Contact Disegno for orders, sizing help, and customer care.",
 };
 
 export default function ContactPage() {
   return (
     <>
+      <JsonLd data={contactPageSchema} />
+
       <Header />
+
       <main className="bg-cream border-b border-grey-200">
         <section className="py-10 sm:py-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -86,6 +98,7 @@ export default function ContactPage() {
           </div>
         </section>
       </main>
+
       <Footer />
     </>
   );
