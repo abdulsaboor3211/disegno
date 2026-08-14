@@ -16,7 +16,10 @@ export default function HeritageSection() {
   const hasImage = heritageImageExists();
 
   return (
-    <section id="heritage" className="py-14 sm:py-20 bg-grey-100 border-y border-grey-200">
+    <section
+      id="heritage"
+      className="py-14 sm:py-20 bg-grey-100 border-y border-grey-200"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div className="relative">
@@ -31,8 +34,9 @@ export default function HeritageSection() {
                 />
               ) : null}
             </div>
+
             <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 bg-action text-white p-5 sm:p-6 max-w-[200px]">
-              <p className="font-serif text-2xl font-semibold">Since</p>
+              <p className="font-serif text-2xl font-semibold">Inspired by</p>
               <p className="font-serif text-4xl font-bold">Peshawar</p>
               <p className="text-xs uppercase tracking-widest mt-1 opacity-80">
                 A tradition of craft
@@ -44,27 +48,31 @@ export default function HeritageSection() {
             <p className="text-burgundy text-xs font-semibold uppercase tracking-[0.25em] mb-3">
               Our Heritage
             </p>
+
             <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-foreground mb-6 leading-tight">
-              Preserving Culture, One Pair at a Time
+              The Heritage of Handmade Peshawari Chappal
             </h2>
+
             <div className="space-y-4 text-grey-700 text-sm sm:text-base leading-relaxed">
               <p>
-                The Peshawari Chappal is a traditional shoe that showcases the rich
-                culture of Peshawar. Handmade with care, these shoes symbolize
-                craftsmanship and elegance. They are stylish, comfortable, and
-                long-lasting, making them a popular choice for many.
+                The Peshawari Chappal is a traditional style of footwear rooted
+                in the cultural heritage of Peshawar. Handmade with care, each
+                pair reflects generations of craftsmanship while offering
+                comfort, durability, and timeless style.
               </p>
+
               <p>
-                Disegno Chappal Chappal is crafted from high-quality leather, perfect
-                for everyday wear and special occasions. Whether you&apos;re
-                attending a family gathering or enjoying a casual outing with
-                friends, this can elevate any outfit and add a touch of
-                sophistication to your look.
+                Disegno&apos;s handmade Peshawari chappals are crafted from
+                high-quality leather for both everyday wear and special
+                occasions. The traditional design, detailed finishing, and
+                comfortable construction make each pair a distinctive addition
+                to both casual and formal looks.
               </p>
+
               <p>
-                Each pair will reflect Disegno&apos;s commitment to provide the best
-                comfortable and stylish product to the customer while keeping in
-                mind to preserve the cultural heritage.
+                Each leather Peshawari chappal reflects Disegno&apos;s
+                commitment to quality craftsmanship, comfort, and preserving
+                the character of this traditional footwear.
               </p>
             </div>
 
