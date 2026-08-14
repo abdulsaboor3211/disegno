@@ -78,7 +78,7 @@ function getPosterImage(row) {
 function getExtraImages(row) {
   const images = {};
 
-  for (let i = 1; i <= 9; i++) {
+  for (let i = 1; i <= 10; i++) {
     images[`img${i}`] = row[`img${i}`] || "";
   }
 

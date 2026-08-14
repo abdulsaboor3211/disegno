@@ -73,22 +73,43 @@ export default function Footer() {
             <h4 className="text-xs font-semibold uppercase tracking-[0.2em] mb-4 text-grey-300">
               Customer Care
             </h4>
+
             <ul className="space-y-2">
-              {[
-                "Shipping & Delivery",
-                "Returns & Exchange",
-                "Track Order",
-                "FAQs",
-              ].map((link) => (
-                <li key={link}>
-                  <Link
-                    href="/contact"
-                    className="text-sm text-grey-300 hover:text-white transition-colors"
-                  >
-                    {link}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link
+                  href="/shipping-delivery"
+                  className="text-sm text-grey-300 hover:text-white transition-colors"
+                >
+                  Shipping & Delivery
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/returns-exchange"
+                  className="text-sm text-grey-300 hover:text-white transition-colors"
+                >
+                  Returns & Exchange
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/track-order"
+                  className="text-sm text-grey-300 hover:text-white transition-colors"
+                >
+                  Track Order
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/faqs"
+                  className="text-sm text-grey-300 hover:text-white transition-colors"
+                >
+                  FAQs
+                </Link>
+              </li>
             </ul>
           </div>
 

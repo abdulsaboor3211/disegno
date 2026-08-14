@@ -39,6 +39,7 @@ export default function ProductCard({ product }) {
     : 0;
 
   const orderHref = `/order?sku=${encodeURIComponent(product.sku)}`;
+  const productHref = `/product/${encodeURIComponent(product.sku)}`;
   const hasImage = isValidImageSrc(product.productImage);
   const availableSizes = product.availableSizes || [];
 
@@ -51,7 +52,7 @@ export default function ProductCard({ product }) {
   return (
     <article className="group bg-white border border-grey-200 hover:border-burgundy/40 transition-colors flex flex-col">
       <div className="relative aspect-[4/3] bg-grey-100 overflow-hidden">
-        <Link href={orderHref} className="relative block w-full h-full">
+        <Link href={productHref} className="relative block w-full h-full">
           {hasImage ? (
             <Image
               src={product.productImage}
@@ -73,7 +74,7 @@ export default function ProductCard({ product }) {
         {/* <p className="text-[10px] text-grey-500 uppercase tracking-widest mb-1">
           SKU: {product.sku}
         </p> */}
-        <Link href={orderHref}>
+        <Link href={productHref}>
           <h3 className="font-serif text-base font-semibold text-foreground leading-snug mb-4 group-hover:text-burgundy transition-colors">
             {product.productName}
           </h3>
