@@ -14,21 +14,21 @@ export const metadata = {
   metadataBase: new URL("https://disegnoproducts.com"),
 
   title: {
-    default: "Disegno | Handmade Peshawari Chappals",
+    default: "Peshawari Chappal Pakistan | Handmade Leather | Disegno",
     template: "%s | Disegno",
   },
 
   description:
-    "Shop premium handmade Peshawari chappals crafted from high-quality leather. Traditional Pakistani footwear designed for everyday wear and special occasions.",
+    "Shop premium handmade Peshawari chappals in Pakistan, crafted from high-quality leather for comfort, durability, everyday wear and special occasions.",
 
   icons: {
     icon: "/favicon.png",
   },
 
   openGraph: {
-    title: "Disegno | Handmade Peshawari Chappals",
+    title: "Peshawari Chappal Pakistan | Handmade Leather | Disegno",
     description:
-      "Shop premium handmade Peshawari chappals crafted from high-quality leather. Traditional Pakistani footwear designed for everyday wear and special occasions.",
+      "Shop premium handmade Peshawari chappals in Pakistan, crafted from high-quality leather for comfort, durability, everyday wear and special occasions.",
     url: "/",
     siteName: "Disegno",
     type: "website",
@@ -37,9 +37,9 @@ export const metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Disegno | Handmade Peshawari Chappals",
+    title: "Peshawari Chappal Pakistan | Handmade Leather | Disegno",
     description:
-      "Shop premium handmade Peshawari chappals crafted from high-quality leather. Traditional Pakistani footwear designed for everyday wear and special occasions.",
+      "Shop premium handmade Peshawari chappals in Pakistan, crafted from high-quality leather for comfort, durability, everyday wear and special occasions.",
   },
 };
 
@@ -74,7 +74,7 @@ export default function RootLayout({ children }) {
               !function(f,b,e,v,n,t,s)
               {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
               n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              if(!f._fbq)f.fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
               n.queue=[];t=b.createElement(e);t.async=!0;
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',

@@ -7,7 +7,7 @@ export default function Banner() {
     <section className="relative w-full overflow-hidden">
       <Image
         src={BANNER_IMAGE}
-        alt="Disegno Banner"
+        alt="Disegno handmade Peshawari chappal"
         width={1920}
         height={800}
         className="w-full h-auto"

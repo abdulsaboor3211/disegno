@@ -15,9 +15,10 @@ export default async function ProductsSection() {
             Shop Peshawari Chappal
           </h2>
           <p className="text-grey-500 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
-            Disegno Chappal Chappal is crafted from high-quality leather, perfect for
-            everyday wear and special occasions. Each pair reflects our
-            commitment to comfort, style, and cultural heritage.
+            Disegno handmade Peshawari chappals are crafted in Pakistan from high-quality
+            leather, combining traditional craftsmanship with comfort and timeless style.
+            Explore our collection of premium leather Peshawari chappals for everyday
+            wear and special occasions.
           </p>
         </div>
 
