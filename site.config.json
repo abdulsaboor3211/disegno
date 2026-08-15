@@ -1,0 +1,48 @@
+{
+  "brand": {
+    "name": "Disegno",
+    "tagline": "Premium Handmade Peshawari Chappals",
+    "description": "Tradition meets elegance in every stitch."
+  },
+
+  "colors": {
+    "primary": "#7A2230",
+    "secondary": "#FFFFFF",
+    "text": "#1F2937",
+    "background": "#F9FAFB",
+    "accent": "#8B1A1A"
+  },
+
+  "contact": {
+    "email": "disegnoproducts@gmail.com",
+    "phone": "+92 316 1819191",
+    "whatsapp": "+92 316 1819191",
+    "address": "Peshawar, Pakistan"
+  },
+
+  "social": {
+    "whatsapp": "https://wa.me/923161819191",
+    "instagram": "https://www.instagram.com/disegno.pk?igsh=MWt1ZjB0dWlnazZ0cg%3D%3D&utm_source=qr",
+    "facebook": "https://www.facebook.com/disegnoproducts",
+    "tiktok": "https://www.tiktok.com/@disegno.pk?_r=1&_t=ZS-98eUdK2XCMh"
+  },
+
+  "googleAnalytics": {
+    "measurementId": ""
+  },
+
+  "footer": {
+    "quickLinks": [
+      "Home",
+      "Shop",
+      "Our Story",
+      "Contact"
+    ],
+    "customerCare": [
+      "Shipping & Delivery",
+      "Returns & Exchange",
+      "Track Order",
+      "FAQs"
+    ]
+  }
+}

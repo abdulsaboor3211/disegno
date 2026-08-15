@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+
 import { formatPrice } from "@/data/products";
 import { PRODUCT_SIZES } from "@/data/sizes";
 import { useCart } from "@/context/CartContext";
@@ -12,8 +13,10 @@ function getShortSize(size) {
   const match = size.match(/UK\s*(\d+)/i);
   return match ? `UK${match[1]}` : size;
 }
+
 function getContrastColor(hex) {
   const color = hex.replace("#", "");
+
   const r = parseInt(color.substring(0, 2), 16);
   const g = parseInt(color.substring(2, 4), 16);
   const b = parseInt(color.substring(4, 6), 16);
@@ -24,12 +27,15 @@ function getContrastColor(hex) {
 }
 
 const BRAND_COLOR = "#7A2230";
+
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
+
   const [added, setAdded] = useState(false);
 
   const hasDiscount =
-    product.discountPrice && product.discountPrice < product.productPrice;
+    product.discountPrice &&
+    product.discountPrice < product.productPrice;
 
   const discountPercent = hasDiscount
     ? Math.round(
@@ -39,21 +45,48 @@ export default function ProductCard({ product }) {
     )
     : 0;
 
-  const productHref = `/products/${encodeURIComponent(product.sku)}`;
+  /*
+   * PRODUCT PAGE
+   *
+   * Existing route in your project:
+   * /product/[sku]
+   */
+  const productHref = `/product/${encodeURIComponent(product.sku)}`;
+
+  /*
+   * BUY NOW
+   *
+   * Goes directly to:
+   * /order?sku=...
+   */
   const orderHref = `/order?sku=${encodeURIComponent(product.sku)}`;
+
   const hasImage = isValidImageSrc(product.productImage);
+
   const availableSizes = product.availableSizes || [];
 
   function handleAddToCart() {
     addItem(product, 1);
+
     setAdded(true);
-    window.setTimeout(() => setAdded(false), 1600);
+
+    window.setTimeout(() => {
+      setAdded(false);
+    }, 1600);
   }
 
   return (
     <article className="group bg-white border border-grey-200 hover:border-burgundy/40 transition-colors flex flex-col">
+
+      {/* =========================
+          PRODUCT IMAGE
+      ========================= */}
       <div className="relative aspect-[4/3] bg-grey-100 overflow-hidden">
-        <Link href={productHref} className="relative block w-full h-full">
+
+        <Link
+          href={productHref}
+          className="relative block w-full h-full"
+        >
           {hasImage ? (
             <Image
               src={product.productImage}
@@ -65,6 +98,7 @@ export default function ProductCard({ product }) {
           ) : null}
         </Link>
 
+        {/* DISCOUNT BADGE */}
         {hasDiscount && (
           <span className="absolute bottom-3 right-3 bg-action text-white text-xs font-bold px-2 py-1 uppercase tracking-wide">
             -{discountPercent}%
@@ -72,11 +106,12 @@ export default function ProductCard({ product }) {
         )}
       </div>
 
+      {/* =========================
+          PRODUCT INFORMATION
+      ========================= */}
       <div className="p-4 flex flex-col flex-1 border-t border-grey-200">
-        {/* <p className="text-[10px] text-grey-500 uppercase tracking-widest mb-1">
-          SKU: {product.sku}
-        </p>
 
+        {/* PRODUCT NAME */}
         <Link href={productHref}>
           <h3 className="font-serif text-base font-semibold text-foreground leading-snug mb-4 group-hover:text-burgundy transition-colors">
             {product.productName}
@@ -84,7 +119,13 @@ export default function ProductCard({ product }) {
         </Link>
 
         <div className="mt-auto pt-3 border-t border-grey-100">
+
+          {/* =========================
+              PRICE + SIZES
+          ========================= */}
           <div className="flex justify-between items-start gap-3 mb-3">
+
+            {/* PRICE */}
             <div>
               {hasDiscount ? (
                 <>
@@ -103,10 +144,14 @@ export default function ProductCard({ product }) {
               )}
             </div>
 
+            {/* AVAILABLE SIZES */}
             <div className="flex flex-wrap justify-end gap-1 max-w-[150px]">
+
               {PRODUCT_SIZES.map((size) => {
+
                 const available = availableSizes.some(
-                  (item) => getShortSize(item) === getShortSize(size)
+                  (item) =>
+                    getShortSize(item) === getShortSize(size)
                 );
 
                 return (
@@ -115,7 +160,10 @@ export default function ProductCard({ product }) {
                     title={size}
                     className="px-1.5 py-1 rounded text-[9px] font-semibold"
                     style={{
-                      backgroundColor: available ? BRAND_COLOR : "#E5E7EB",
+                      backgroundColor: available
+                        ? BRAND_COLOR
+                        : "#E5E7EB",
+
                       color: available
                         ? getContrastColor(BRAND_COLOR)
                         : "#6B7280",
@@ -125,10 +173,16 @@ export default function ProductCard({ product }) {
                   </span>
                 );
               })}
+
             </div>
           </div>
 
+          {/* =========================
+              ACTION BUTTONS
+          ========================= */}
           <div className="flex flex-col sm:flex-row gap-2">
+
+            {/* ADD TO CART */}
             <button
               type="button"
               onClick={handleAddToCart}
@@ -137,12 +191,14 @@ export default function ProductCard({ product }) {
               {added ? "Added ✓" : "Add to Cart"}
             </button>
 
+            {/* BUY / ORDER NOW */}
             <Link
               href={orderHref}
               className="flex-1 text-center px-3 py-2 bg-action text-white text-xs font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors"
             >
               Order Now
             </Link>
+
           </div>
         </div>
       </div>
