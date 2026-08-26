@@ -11,7 +11,7 @@ import {
   DEFAULT_PRODUCT_COLOR,
   PRODUCT_SIZES,
 } from "@/data/sizes";
-
+import { trackCheckout } from "@/lib/analytics";
 import { useCart } from "@/context/CartContext";
 import { isValidImageSrc } from "@/lib/imageUrl";
 
@@ -559,8 +559,8 @@ export default function OrderForm({
 
           <label
             className={`flex items-center gap-4 border-2 p-4 cursor-pointer transition-colors ${paymentMethod === "cod"
-                ? "border-burgundy bg-[#faf7f5]"
-                : "border-grey-300"
+              ? "border-burgundy bg-[#faf7f5]"
+              : "border-grey-300"
               }`}
           >
             <input

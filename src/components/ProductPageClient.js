@@ -16,6 +16,7 @@ import {
 import { useCart } from "@/context/CartContext";
 
 import { isValidImageSrc } from "@/lib/imageUrl";
+import { trackAddToCart, trackOrderNow } from "@/lib/analytics"; //
 
 const BRAND_COLOR = "#7A2230";
 
@@ -96,6 +97,8 @@ export default function ProductPageClient({ product }) {
      * Add to cart with selected variant
      */
     function handleAddToCart() {
+        const variant = { size, color };
+        trackAddToCart(product, quantity, variant);
         addItem(product, quantity, {
             size,
             color,
@@ -112,6 +115,9 @@ export default function ProductPageClient({ product }) {
      * Buy Now - Pass selected variant to checkout
      */
     function handleBuyNow() {
+        const variant = { size, color };
+        trackOrderNow(product, quantity, variant);
+
         const params = new URLSearchParams({
             sku: product.sku,
             size,
@@ -175,8 +181,8 @@ export default function ProductPageClient({ product }) {
                                                 onClick={() => setSelectedImage(image)}
                                                 aria-label={`View product image ${index + 1}`}
                                                 className={`relative w-16 h-16 border-2 overflow-hidden bg-grey-100 ${active
-                                                        ? "border-burgundy"
-                                                        : "border-grey-200 hover:border-grey-400"
+                                                    ? "border-burgundy"
+                                                    : "border-grey-200 hover:border-grey-400"
                                                     }`}
                                             >
                                                 <Image
