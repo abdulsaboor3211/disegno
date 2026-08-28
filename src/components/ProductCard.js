@@ -8,6 +8,7 @@ import { formatPrice } from "@/data/products";
 import { PRODUCT_SIZES } from "@/data/sizes";
 import { useCart } from "@/context/CartContext";
 import { isValidImageSrc } from "@/lib/imageUrl";
+import { trackAddToCart, trackOrderNow } from "@/lib/analytics"; // 👈 Add this
 
 function getShortSize(size) {
   const match = size.match(/UK\s*(\d+)/i);
@@ -45,27 +46,21 @@ export default function ProductCard({ product }) {
     )
     : 0;
 
-  /*
-   * PRODUCT PAGE
-   *
-   * Existing route in your project:
-   * /product/[sku]
-   */
   const productHref = `/product/${encodeURIComponent(product.sku)}`;
-
-  /*
-   * BUY NOW
-   *
-   * Goes directly to:
-   * /order?sku=...
-   */
   const orderHref = `/order?sku=${encodeURIComponent(product.sku)}`;
 
   const hasImage = isValidImageSrc(product.productImage);
 
+  const sizeStockMap = product.sizeStockMap || {};
   const availableSizes = product.availableSizes || [];
 
   function handleAddToCart() {
+    // 👇 Track Add to Cart event
+    const variant = {
+      size: availableSizes.length > 0 ? availableSizes[0] : null,
+    };
+    trackAddToCart(product, 1, variant);
+
     addItem(product, 1);
 
     setAdded(true);
@@ -75,14 +70,19 @@ export default function ProductCard({ product }) {
     }, 1600);
   }
 
+  function handleOrderNow() {
+    // 👇 Track Order Now event
+    const variant = {
+      size: availableSizes.length > 0 ? availableSizes[0] : null,
+    };
+    trackOrderNow(product, 1, variant);
+  }
+
   return (
     <article className="group bg-white border border-grey-200 hover:border-burgundy/40 transition-colors flex flex-col">
 
-      {/* =========================
-          PRODUCT IMAGE
-      ========================= */}
+      {/* PRODUCT IMAGE */}
       <div className="relative aspect-[4/3] bg-grey-100 overflow-hidden">
-
         <Link
           href={productHref}
           className="relative block w-full h-full"
@@ -98,7 +98,6 @@ export default function ProductCard({ product }) {
           ) : null}
         </Link>
 
-        {/* DISCOUNT BADGE */}
         {hasDiscount && (
           <span className="absolute bottom-3 right-3 bg-action text-white text-xs font-bold px-2 py-1 uppercase tracking-wide">
             -{discountPercent}%
@@ -106,12 +105,9 @@ export default function ProductCard({ product }) {
         )}
       </div>
 
-      {/* =========================
-          PRODUCT INFORMATION
-      ========================= */}
+      {/* PRODUCT INFORMATION */}
       <div className="p-4 flex flex-col flex-1 border-t border-grey-200">
 
-        {/* PRODUCT NAME */}
         <Link href={productHref}>
           <h3 className="font-serif text-base font-semibold text-foreground leading-snug mb-4 group-hover:text-burgundy transition-colors">
             {product.productName}
@@ -120,19 +116,15 @@ export default function ProductCard({ product }) {
 
         <div className="mt-auto pt-3 border-t border-grey-100">
 
-          {/* =========================
-              PRICE + SIZES
-          ========================= */}
+          {/* PRICE + SIZES */}
           <div className="flex justify-between items-start gap-3 mb-3">
 
-            {/* PRICE */}
             <div>
               {hasDiscount ? (
                 <>
                   <p className="text-lg font-bold text-burgundy">
                     {formatPrice(product.discountPrice)}
                   </p>
-
                   <p className="text-sm text-grey-500 line-through">
                     {formatPrice(product.productPrice)}
                   </p>
@@ -144,45 +136,34 @@ export default function ProductCard({ product }) {
               )}
             </div>
 
-            {/* AVAILABLE SIZES */}
             <div className="flex flex-wrap justify-end gap-1 max-w-[150px]">
-
               {PRODUCT_SIZES.map((size) => {
-
-                const available = availableSizes.some(
-                  (item) =>
-                    getShortSize(item) === getShortSize(size)
-                );
+                const stock = sizeStockMap[size] || 0;
+                const isAvailable = stock > 0;
 
                 return (
                   <span
                     key={size}
-                    title={size}
-                    className="px-1.5 py-1 rounded text-[9px] font-semibold"
+                    title={`${getShortSize(size)}${isAvailable ? ` — ${stock} in stock` : " — Out of stock"}`}
+                    className="px-1.5 py-1 rounded text-[9px] font-semibold relative group/size"
                     style={{
-                      backgroundColor: available
-                        ? BRAND_COLOR
-                        : "#E5E7EB",
-
-                      color: available
-                        ? getContrastColor(BRAND_COLOR)
-                        : "#6B7280",
+                      backgroundColor: isAvailable ? BRAND_COLOR : "#E5E7EB",
+                      color: isAvailable ? getContrastColor(BRAND_COLOR) : "#6B7280",
+                      textDecoration: isAvailable ? "none" : "line-through",
                     }}
                   >
                     {getShortSize(size)}
+                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 bg-foreground text-white text-[8px] px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover/size:opacity-100 transition-opacity">
+                      {isAvailable ? `${stock} left` : "Out of stock"}
+                    </span>
                   </span>
                 );
               })}
-
             </div>
           </div>
 
-          {/* =========================
-              ACTION BUTTONS
-          ========================= */}
+          {/* ACTION BUTTONS */}
           <div className="flex flex-col sm:flex-row gap-2">
-
-            {/* ADD TO CART */}
             <button
               type="button"
               onClick={handleAddToCart}
@@ -190,15 +171,13 @@ export default function ProductCard({ product }) {
             >
               {added ? "Added ✓" : "Add to Cart"}
             </button>
-
-            {/* BUY / ORDER NOW */}
             <Link
               href={orderHref}
+              onClick={handleOrderNow} // 👈 Add tracking
               className="flex-1 text-center px-3 py-2 bg-action text-white text-xs font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors"
             >
               Order Now
             </Link>
-
           </div>
         </div>
       </div>

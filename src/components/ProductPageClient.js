@@ -16,15 +16,13 @@ import {
 import { useCart } from "@/context/CartContext";
 
 import { isValidImageSrc } from "@/lib/imageUrl";
+import { trackAddToCart, trackOrderNow } from "@/lib/analytics"; //
 
 const BRAND_COLOR = "#7A2230";
 
 function getShortSize(size) {
     const match = size.match(/UK\s*\*?(\d+)/i);
-
-    return match
-        ? `UK${match[1]}`
-        : size;
+    return match ? `UK${match[1]}` : size;
 }
 
 function getProductImages(product) {
@@ -32,10 +30,7 @@ function getProductImages(product) {
     const images = [];
 
     const addImage = (src) => {
-        if (
-            isValidImageSrc(src) &&
-            !seen.has(src)
-        ) {
+        if (isValidImageSrc(src) && !seen.has(src)) {
             seen.add(src);
             images.push(src);
         }
@@ -52,24 +47,19 @@ function getProductImages(product) {
     return images;
 }
 
-export default function ProductPageClient({
-    product,
-}) {
+// 👇 Get stock for a specific size
+function getSizeStock(product, sizeLabel) {
+    const sizeStockMap = product.sizeStockMap || {};
+    return sizeStockMap[sizeLabel] || 0;
+}
+
+export default function ProductPageClient({ product }) {
     const { addItem } = useCart();
 
-    const [selectedImage, setSelectedImage] =
-        useState(null);
-
+    const [selectedImage, setSelectedImage] = useState(null);
     const [quantity, setQuantity] = useState(1);
-
-    const [size, setSize] = useState(
-        DEFAULT_PRODUCT_SIZE
-    );
-
-    const [color, setColor] = useState(
-        DEFAULT_PRODUCT_COLOR
-    );
-
+    const [size, setSize] = useState(DEFAULT_PRODUCT_SIZE);
+    const [color, setColor] = useState(DEFAULT_PRODUCT_COLOR);
     const [added, setAdded] = useState(false);
 
     const productImages = useMemo(
@@ -79,8 +69,7 @@ export default function ProductPageClient({
 
     const hasDiscount =
         product.discountPrice &&
-        product.discountPrice <
-        product.productPrice;
+        product.discountPrice < product.productPrice;
 
     const unitPrice = hasDiscount
         ? product.discountPrice
@@ -88,25 +77,28 @@ export default function ProductPageClient({
 
     const total = unitPrice * quantity;
 
-    const availableSizes =
-        product.availableSizes || [];
+    const availableSizes = product.availableSizes || [];
+    const sizeStockMap = product.sizeStockMap || {};
 
     function isSizeAvailable(sizeOption) {
         if (availableSizes.length === 0) {
             return true;
         }
-
         return availableSizes.some(
-            (item) =>
-                getShortSize(item) ===
-                getShortSize(sizeOption)
+            (item) => getShortSize(item) === getShortSize(sizeOption)
         );
+    }
+
+    function getStockForSize(sizeOption) {
+        return sizeStockMap[sizeOption] || 0;
     }
 
     /*
      * Add to cart with selected variant
      */
     function handleAddToCart() {
+        const variant = { size, color };
+        trackAddToCart(product, quantity, variant);
         addItem(product, quantity, {
             size,
             color,
@@ -120,11 +112,12 @@ export default function ProductPageClient({
     }
 
     /*
-     * Buy Now
-     *
-     * Pass selected variant to checkout.
+     * Buy Now - Pass selected variant to checkout
      */
     function handleBuyNow() {
+        const variant = { size, color };
+        trackOrderNow(product, quantity, variant);
+
         const params = new URLSearchParams({
             sku: product.sku,
             size,
@@ -132,14 +125,10 @@ export default function ProductPageClient({
             quantity: String(quantity),
         });
 
-        window.location.href =
-            `/order?${params.toString()}`;
+        window.location.href = `/order?${params.toString()}`;
     }
 
-    const displayImage =
-        selectedImage ||
-        productImages[0] ||
-        null;
+    const displayImage = selectedImage || productImages[0] || null;
 
     return (
         <main className="bg-cream border-b border-grey-200">
@@ -157,16 +146,12 @@ export default function ProductPageClient({
                     <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
 
                         {/* =========================
-                LEFT - IMAGES
-            ========================== */}
-
+                            LEFT - IMAGES
+                        ========================== */}
                         <div className="bg-white border border-grey-200 p-4 sm:p-6 h-fit">
 
                             <div className="relative aspect-[4/3] bg-grey-100 overflow-hidden">
-
-                                {isValidImageSrc(
-                                    displayImage
-                                ) ? (
+                                {isValidImageSrc(displayImage) ? (
                                     <Image
                                         src={displayImage}
                                         alt={product.productName}
@@ -180,58 +165,43 @@ export default function ProductPageClient({
                                         No image available
                                     </div>
                                 )}
-
                             </div>
 
                             {/* Thumbnails */}
                             {productImages.length > 1 && (
                                 <div className="flex flex-wrap gap-2 mt-4">
+                                    {productImages.map((image, index) => {
+                                        const active =
+                                            (selectedImage || productImages[0]) === image;
 
-                                    {productImages.map(
-                                        (image, index) => {
-                                            const active =
-                                                (selectedImage ||
-                                                    productImages[0]) ===
-                                                image;
-
-                                            return (
-                                                <button
-                                                    key={`${image}-${index}`}
-                                                    type="button"
-                                                    onClick={() =>
-                                                        setSelectedImage(
-                                                            image
-                                                        )
-                                                    }
-                                                    aria-label={`View product image ${index + 1
-                                                        }`}
-                                                    className={`relative w-16 h-16 border-2 overflow-hidden bg-grey-100 ${active
-                                                            ? "border-burgundy"
-                                                            : "border-grey-200 hover:border-grey-400"
-                                                        }`}
-                                                >
-                                                    <Image
-                                                        src={image}
-                                                        alt={`${product.productName} ${index + 1
-                                                            }`}
-                                                        fill
-                                                        sizes="64px"
-                                                        className="object-contain p-1"
-                                                    />
-                                                </button>
-                                            );
-                                        }
-                                    )}
-
+                                        return (
+                                            <button
+                                                key={`${image}-${index}`}
+                                                type="button"
+                                                onClick={() => setSelectedImage(image)}
+                                                aria-label={`View product image ${index + 1}`}
+                                                className={`relative w-16 h-16 border-2 overflow-hidden bg-grey-100 ${active
+                                                    ? "border-burgundy"
+                                                    : "border-grey-200 hover:border-grey-400"
+                                                    }`}
+                                            >
+                                                <Image
+                                                    src={image}
+                                                    alt={`${product.productName} ${index + 1}`}
+                                                    fill
+                                                    sizes="64px"
+                                                    className="object-contain p-1"
+                                                />
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             )}
-
                         </div>
 
                         {/* =========================
-                RIGHT - DETAILS
-            ========================== */}
-
+                            RIGHT - DETAILS
+                        ========================== */}
                         <div className="bg-white border border-grey-200 p-5 sm:p-8 h-fit">
 
                             {/* Product name */}
@@ -241,26 +211,18 @@ export default function ProductPageClient({
 
                             {/* Price */}
                             <div className="flex items-end gap-3 mb-6">
-
                                 {hasDiscount ? (
                                     <>
                                         <p className="text-2xl sm:text-3xl font-bold text-burgundy">
-                                            {formatPrice(
-                                                product.discountPrice
-                                            )}
+                                            {formatPrice(product.discountPrice)}
                                         </p>
-
                                         <p className="text-base text-grey-500 line-through pb-1">
-                                            {formatPrice(
-                                                product.productPrice
-                                            )}
+                                            {formatPrice(product.productPrice)}
                                         </p>
-
                                         <span className="bg-action text-white text-xs font-bold px-2 py-1">
                                             -
                                             {Math.round(
-                                                ((product.productPrice -
-                                                    product.discountPrice) /
+                                                ((product.productPrice - product.discountPrice) /
                                                     product.productPrice) *
                                                 100
                                             )}
@@ -269,12 +231,9 @@ export default function ProductPageClient({
                                     </>
                                 ) : (
                                     <p className="text-2xl sm:text-3xl font-bold text-foreground">
-                                        {formatPrice(
-                                            product.productPrice
-                                        )}
+                                        {formatPrice(product.productPrice)}
                                     </p>
                                 )}
-
                             </div>
 
                             {/* Description */}
@@ -286,170 +245,119 @@ export default function ProductPageClient({
                                 </div>
                             )}
 
-                            {/* Size */}
+                            {/* 👇 SIZE WITH STOCK DISPLAY */}
                             <div className="mb-6">
-
                                 <div className="flex items-center justify-between mb-2">
                                     <label
                                         htmlFor="product-size"
-                                        className="text-sm font-semibold uppercase tracking-wider"
+                                        className="text-sm font-semibold uppercase tracking-wider text-foreground"
                                     >
                                         Size
                                     </label>
-
-                                    {availableSizes.length > 0 && (
-                                        <span className="text-xs text-grey-500">
-                                            {availableSizes.length} available
-                                        </span>
-                                    )}
+                                    <span className="text-xs text-grey-500">
+                                        {availableSizes.length > 0
+                                            ? `${availableSizes.length} in stock`
+                                            : "Check availability"}
+                                    </span>
                                 </div>
 
                                 <select
                                     id="product-size"
                                     value={size}
-                                    onChange={(event) =>
-                                        setSize(event.target.value)
-                                    }
+                                    onChange={(event) => setSize(event.target.value)}
                                     className="w-full appearance-none border-2 border-foreground bg-white px-3 py-3 text-sm text-foreground focus:outline-none focus:border-burgundy"
                                 >
-                                    {PRODUCT_SIZES.map(
-                                        (option) => {
-                                            const available =
-                                                isSizeAvailable(
-                                                    option
-                                                );
+                                    {PRODUCT_SIZES.map((option) => {
+                                        const stock = getStockForSize(option);
+                                        const available = stock > 0;
 
-                                            return (
-                                                <option
-                                                    key={option}
-                                                    value={option}
-                                                    disabled={!available}
-                                                >
-                                                    {option}
-                                                    {!available
-                                                        ? " — Unavailable"
-                                                        : ""}
-                                                </option>
-                                            );
-                                        }
-                                    )}
+                                        return (
+                                            <option
+                                                key={option}
+                                                value={option}
+                                                disabled={!available}
+                                            >
+                                                {option}
+                                                {!available
+                                                    ? " — Out of Stock"
+                                                    : ` (${stock} available)`}
+                                            </option>
+                                        );
+                                    })}
                                 </select>
-
                             </div>
 
                             {/* Color */}
                             <div className="mb-6">
-
                                 <label
                                     htmlFor="product-color"
-                                    className="block text-sm font-semibold uppercase tracking-wider mb-2"
+                                    className="block text-sm font-semibold uppercase tracking-wider text-foreground mb-2"
                                 >
                                     Color
                                 </label>
-
                                 <select
                                     id="product-color"
                                     value={color}
-                                    onChange={(event) =>
-                                        setColor(event.target.value)
-                                    }
+                                    onChange={(event) => setColor(event.target.value)}
                                     className="w-full appearance-none border-2 border-foreground bg-white px-3 py-3 text-sm text-foreground focus:outline-none focus:border-burgundy"
                                 >
-                                    {PRODUCT_COLORS.map(
-                                        (option) => (
-                                            <option
-                                                key={option}
-                                                value={option}
-                                            >
-                                                {option}
-                                            </option>
-                                        )
-                                    )}
+                                    {PRODUCT_COLORS.map((option) => (
+                                        <option key={option} value={option}>
+                                            {option}
+                                        </option>
+                                    ))}
                                 </select>
-
                             </div>
 
                             {/* Quantity */}
                             <div className="mb-6">
-
-                                <p className="text-sm font-semibold uppercase tracking-wider mb-2">
+                                <p className="text-sm font-semibold uppercase tracking-wider text-foreground mb-2">
                                     Quantity
                                 </p>
-
                                 <div className="inline-flex items-center border border-grey-300">
-
                                     <button
                                         type="button"
                                         onClick={() =>
-                                            setQuantity(
-                                                (current) =>
-                                                    Math.max(
-                                                        1,
-                                                        current - 1
-                                                    )
-                                            )
+                                            setQuantity((current) => Math.max(1, current - 1))
                                         }
-                                        className="w-11 h-11 text-lg hover:bg-grey-100"
+                                        className="w-11 h-11 text-lg text-grey-700 hover:bg-grey-100"
                                     >
                                         −
                                     </button>
-
                                     <span className="w-12 text-center font-semibold">
                                         {quantity}
                                     </span>
-
                                     <button
                                         type="button"
                                         onClick={() =>
-                                            setQuantity(
-                                                (current) =>
-                                                    Math.min(
-                                                        50,
-                                                        current + 1
-                                                    )
-                                            )
+                                            setQuantity((current) => Math.min(50, current + 1))
                                         }
-                                        className="w-11 h-11 text-lg hover:bg-grey-100"
+                                        className="w-11 h-11 text-lg text-grey-700 hover:bg-grey-100"
                                     >
                                         +
                                     </button>
-
                                 </div>
-
                             </div>
 
                             {/* Total */}
                             <div className="border-t border-grey-200 pt-5 mb-5">
-
                                 <div className="flex items-center justify-between">
-
-                                    <span className="text-sm text-grey-700">
-                                        Total
-                                    </span>
-
+                                    <span className="text-sm text-grey-700">Total</span>
                                     <span className="text-2xl font-bold text-burgundy">
                                         {formatPrice(total)}
                                     </span>
-
                                 </div>
-
                             </div>
 
                             {/* Buttons */}
                             <div className="space-y-3">
-
                                 <button
                                     type="button"
-                                    onClick={
-                                        handleAddToCart
-                                    }
+                                    onClick={handleAddToCart}
                                     className="w-full px-6 py-3.5 border-2 border-burgundy text-burgundy text-sm font-semibold uppercase tracking-wider hover:bg-action hover:text-white transition-colors"
                                 >
-                                    {added
-                                        ? "Added ✓"
-                                        : "Add to Cart"}
+                                    {added ? "Added ✓" : "Add to Cart"}
                                 </button>
-
                                 <button
                                     type="button"
                                     onClick={handleBuyNow}
@@ -457,34 +365,28 @@ export default function ProductPageClient({
                                 >
                                     Buy Now
                                 </button>
-
                             </div>
 
                             <p className="text-xs text-grey-500 leading-relaxed mt-4">
-                                Cash on delivery. We will confirm
-                                your order on WhatsApp or phone.
+                                Cash on delivery. We will confirm your order on WhatsApp or phone.
                             </p>
-
                         </div>
                     </div>
 
                     {/* Poster */}
-                    {isValidImageSrc(
-                        product.posterImage
-                    ) && (
-                            <div className="mt-10 border border-grey-200 bg-white overflow-hidden">
-                                <div className="relative w-full aspect-[4/5] sm:aspect-[16/10]">
-                                    <Image
-                                        src={product.posterImage}
-                                        alt={`${product.productName} poster`}
-                                        fill
-                                        sizes="100vw"
-                                        className="object-contain bg-grey-100"
-                                    />
-                                </div>
+                    {isValidImageSrc(product.posterImage) && (
+                        <div className="mt-10 border border-grey-200 bg-white overflow-hidden">
+                            <div className="relative w-full aspect-[4/5] sm:aspect-[16/10]">
+                                <Image
+                                    src={product.posterImage}
+                                    alt={`${product.productName} poster`}
+                                    fill
+                                    sizes="100vw"
+                                    className="object-contain bg-grey-100"
+                                />
                             </div>
-                        )}
-
+                        </div>
+                    )}
                 </div>
             </section>
         </main>
