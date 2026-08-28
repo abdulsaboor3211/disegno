@@ -149,6 +149,7 @@ export default function ProductCard({ product }) {
                     style={{
                       backgroundColor: isAvailable ? BRAND_COLOR : "#E5E7EB",
                       color: isAvailable ? getContrastColor(BRAND_COLOR) : "#6B7280",
+                      textDecoration: isAvailable ? "none" : "line-through",
                     }}
                   >
                     {getShortSize(size)}

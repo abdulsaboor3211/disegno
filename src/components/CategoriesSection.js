@@ -10,11 +10,11 @@ export default function CategoriesSection({ categories }) {
     }
 
     return (
-        <section className="py-8 bg-white">
+        <section className="py-8 bg-grey-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Restored Section Header */}
                 <div className="text-center mb-6 sm:mb-8">
-                    <h2 className="font-sans text-xl sm:text-2xl font-semibold text-gray-900 tracking-wide">
+                    <h2 className="font-sans text-xl sm:text-2xl font-semibold text-gray-900 tracking-wide underline decoration-amber-700 underline-offset-4">
                         Trending Categories
                     </h2>
                 </div>
@@ -28,7 +28,7 @@ export default function CategoriesSection({ categories }) {
                             className="group flex flex-col items-center text-center w-24 sm:w-28 md:w-32"
                         >
                             {/* Circular Image Container (Sized down to 24-32 Tailwind units) */}
-                            <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full overflow-hidden bg-gray-100 transition-transform duration-300 group-hover:scale-105">
+                            <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full overflow-hidden bg-gray-100 transition-transform duration-300 group-hover:scale-105 border-1 border-amber-700">
                                 {isValidImageSrc(category.image) ? (
                                     <Image
                                         src={category.image}
