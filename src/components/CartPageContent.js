@@ -8,6 +8,7 @@ import { formatPrice } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 
 import { isValidImageSrc } from "@/lib/imageUrl";
+import { getItemVariants, getVariantLabel } from "@/lib/variants";
 
 export default function CartPageContent() {
   const {
@@ -57,7 +58,10 @@ export default function CartPageContent() {
       {/* Cart items */}
       <div className="space-y-4">
 
-        {items.map((item) => (
+        {items.map((item) => {
+          const variants = getItemVariants(item);
+
+          return (
           <article
             key={item.id}
             className="bg-white border border-grey-200 p-4 sm:p-5 flex gap-4"
@@ -100,23 +104,14 @@ export default function CartPageContent() {
               {/* Variant */}
               <div className="flex flex-wrap gap-2 mb-3">
 
-                {item.size && (
-                  <span className="text-xs border border-grey-200 px-2 py-1">
-                    Size:{" "}
+                {Object.entries(variants).map(([key, value]) => (
+                  <span key={key} className="text-xs border border-grey-200 px-2 py-1">
+                    {getVariantLabel(item, key)}:{" "}
                     <strong>
-                      {item.size}
+                      {value}
                     </strong>
                   </span>
-                )}
-
-                {item.color && (
-                  <span className="text-xs border border-grey-200 px-2 py-1">
-                    Color:{" "}
-                    <strong>
-                      {item.color}
-                    </strong>
-                  </span>
-                )}
+                ))}
 
               </div>
 
@@ -188,7 +183,8 @@ export default function CartPageContent() {
             </div>
 
           </article>
-        ))}
+          );
+        })}
 
       </div>
 

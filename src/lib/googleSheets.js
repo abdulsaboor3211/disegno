@@ -1,5 +1,6 @@
 import { fallbackProducts } from "@/data/products";
 import { isValidImageSrc, normalizeImageUrl } from "@/lib/imageUrl";
+import { formatVariantLabel, normalizeVariantKey } from "@/lib/variants";
 
 const SHEET_ID = "1YpRfa0F53dJ6OT_4FIcpMIwE331ZK7l0WRYqQbJU59c";
 const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
@@ -71,14 +72,6 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function parseAvailableSizes(value) {
-  if (!value) return [];
-  return value
-    .split(",")
-    .map((size) => size.trim())
-    .filter(Boolean);
-}
-
 async function fetchSheetRows(sheetName) {
   const response = await fetch(csvUrl(sheetName), {
     next: { revalidate: 60 },
@@ -92,7 +85,51 @@ async function fetchSheetRows(sheetName) {
   return rowsToObjects(csv);
 }
 
-// Fetch product variants (sizes with stock)
+function normalizeHeader(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+function getVariantOptions(row) {
+  const normalizedRow = Object.entries(row).reduce((result, [key, value]) => {
+    result[normalizeHeader(key)] = value;
+    return result;
+  }, {});
+
+  return Object.entries(normalizedRow).reduce(
+    (variant, [header, rawType]) => {
+      const match = header.match(/^variants? type(?: (\d+))?$/);
+
+      if (!match) {
+        return variant;
+      }
+
+      const suffix = match[1] ? ` ${match[1]}` : "";
+      const rawUnit = normalizedRow[`unit${suffix}`];
+      const key = normalizeVariantKey(rawType);
+      let unit = String(rawUnit || "").trim();
+
+      if (!key || !unit) {
+        return variant;
+      }
+
+      if (key === "size") {
+        unit = getFullSizeLabel(unit);
+      }
+
+      variant.options[key] = unit;
+      variant.labels[key] = formatVariantLabel(rawType);
+      return variant;
+    },
+    { options: {}, labels: {} }
+  );
+}
+
+// Each row is one purchasable combination. Numbered type/unit column pairs
+// are discovered dynamically (variant type, variant type 2, type 3, ...).
 async function fetchProductVariants() {
   try {
     const rows = await fetchSheetRows("Variants");
@@ -105,29 +142,20 @@ async function fetchProductVariants() {
         row["Product"] ||
         "";
 
-      const variantType =
-        row["variants type"] ||
-        row["variant type"] ||
-        row["Variant Type"] ||
-        "";
-
-      const unit =
-        row["unit"] ||
-        row["Unit"] ||
-        "";
-
       const stock =
         row["stock"] ||
         row["Stock"] ||
         "0";
 
+      const { options, labels } = getVariantOptions(row);
+
       return {
         productId: String(productId).trim(),
-        variantType: String(variantType).trim().toLowerCase(),
-        unit: String(unit).trim(),
+        options,
+        labels,
         stock: toNumber(stock) || 0,
       };
-    });
+    }).filter((variant) => variant.productId && Object.keys(variant.options).length > 0);
 
     return variants;
   } catch (error) {
@@ -174,19 +202,33 @@ export async function getProducts() {
         const productId = String(row["Product"] || "").trim();
         const productVariants = variantsByProduct[productId] || [];
 
-        // Build size stock map using FULL labels
+        const variantTypesByKey = new Map();
+
+        productVariants.forEach((variant) => {
+          Object.entries(variant.options).forEach(([key, value]) => {
+            if (!variantTypesByKey.has(key)) {
+              variantTypesByKey.set(key, {
+                key,
+                label: variant.labels[key] || formatVariantLabel(key),
+                values: [],
+              });
+            }
+
+            const type = variantTypesByKey.get(key);
+            if (!type.values.includes(value)) {
+              type.values.push(value);
+            }
+          });
+        });
+
+        const variantTypes = Array.from(variantTypesByKey.values());
+
+        // Keep the old size fields for compatibility with any existing UI/data users.
         const sizeStockMap = {};
         productVariants.forEach((variant) => {
-          if (
-            variant.variantType === "size" ||
-            variant.variantType === "sizes"
-          ) {
-            const fullLabel = getFullSizeLabel(variant.unit);
-            if (fullLabel && fullLabel !== variant.unit) {
-              sizeStockMap[fullLabel] = variant.stock;
-            } else if (fullLabel) {
-              sizeStockMap[variant.unit] = variant.stock;
-            }
+          const size = variant.options.size;
+          if (size) {
+            sizeStockMap[size] = (sizeStockMap[size] || 0) + variant.stock;
           }
         });
 
@@ -202,8 +244,10 @@ export async function getProducts() {
           productPrice: toNumber(row["Product Price"]),
           discountPrice: toNumber(row["Discount Price"]),
           productDescription: row["Product Description"] || "",
-          sizeStockMap: sizeStockMap,
-          availableSizes: availableSizes,
+          variants: productVariants.map(({ options, stock }) => ({ options, stock })),
+          variantTypes,
+          sizeStockMap,
+          availableSizes,
           allSizes: Object.keys(sizeStockMap),
           productImage: isValidImageSrc(row["Product Image"])
             ? normalizeImageUrl(row["Product Image"])

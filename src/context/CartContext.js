@@ -8,6 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { normalizeVariantSelections } from "@/lib/variants";
 
 const CART_STORAGE_KEY = "disegno-cart";
 
@@ -24,8 +25,13 @@ function getUnitPrice(product) {
   return product.productPrice || 0;
 }
 
-function createItemId(sku, size, color) {
-  return `${sku}__${size || ""}__${color || ""}`;
+function createItemId(sku, variants) {
+  const variantId = Object.entries(variants)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, value]) => `${key}:${value}`)
+    .join("__");
+
+  return `${sku}__${variantId}`;
 }
 
 export function CartProvider({ children }) {
@@ -43,6 +49,8 @@ export function CartProvider({ children }) {
         const parsed = JSON.parse(raw);
 
         if (Array.isArray(parsed)) {
+          // Browser-only persisted state is intentionally restored after hydration.
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setItems(parsed);
         }
       }
@@ -70,7 +78,7 @@ export function CartProvider({ children }) {
   /*
    * Add product to cart
    *
-   * Size + color are stored with the item.
+   * Any number of selected variant types are stored with the item.
    */
   const addItem = useCallback(
     (
@@ -78,18 +86,25 @@ export function CartProvider({ children }) {
       quantity = 1,
       options = {}
     ) => {
-      const qty = Math.min(
+      const maxQuantity = Math.min(
         50,
+        Math.max(1, Number(options.maxQuantity) || 50)
+      );
+      const qty = Math.min(
+        maxQuantity,
         Math.max(1, Number(quantity) || 1)
       );
 
-      const size = options.size || "";
-      const color = options.color || "";
+      const variants = normalizeVariantSelections(
+        options.variants || {
+          size: options.size,
+          color: options.color,
+        }
+      );
 
       const itemId = createItemId(
         product.sku,
-        size,
-        color
+        variants
       );
 
       setItems((prev) => {
@@ -102,8 +117,9 @@ export function CartProvider({ children }) {
             item.id === itemId
               ? {
                 ...item,
+                maxQuantity: Math.min(item.maxQuantity || 50, maxQuantity),
                 quantity: Math.min(
-                  50,
+                  Math.min(item.maxQuantity || 50, maxQuantity),
                   item.quantity + qty
                 ),
               }
@@ -130,9 +146,11 @@ export function CartProvider({ children }) {
 
             quantity: qty,
 
-            size,
+            maxQuantity,
 
-            color,
+            variants,
+
+            variantLabels: options.variantLabels || {},
           },
         ];
       });
@@ -161,7 +179,7 @@ export function CartProvider({ children }) {
           item.id === itemId
             ? {
               ...item,
-              quantity: qty,
+              quantity: Math.min(qty, item.maxQuantity || 50),
             }
             : item
         );

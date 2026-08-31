@@ -2,18 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { formatPrice } from "@/data/products";
-import {
-  DEFAULT_PRODUCT_SIZE,
-  PRODUCT_COLORS,
-  DEFAULT_PRODUCT_COLOR,
-  PRODUCT_SIZES,
-} from "@/data/sizes";
 import { trackCheckout } from "@/lib/analytics";
 import { useCart } from "@/context/CartContext";
 import { isValidImageSrc } from "@/lib/imageUrl";
+import {
+  getInitialVariantSelections,
+  getItemVariants,
+  getSelectedVariantStock,
+  getVariantLabel,
+  getVariantOptionStock,
+  selectVariantOption,
+} from "@/lib/variants";
 
 const initialCustomer = {
   customerName: "",
@@ -28,8 +30,7 @@ const initialCustomer = {
 export default function OrderForm({
   product = null,
   fromCart = false,
-  initialSize,
-  initialColor,
+  initialVariants = {},
   initialQuantity = 1,
 }) {
   const {
@@ -38,6 +39,14 @@ export default function OrderForm({
     ready,
     subtotal,
   } = useCart();
+  const defaultVariantSelections = getInitialVariantSelections(
+    product,
+    initialVariants
+  );
+  const initialVariantStock = getSelectedVariantStock(
+    product,
+    defaultVariantSelections
+  );
 
   // ==========================================
   // CUSTOMER INFORMATION
@@ -58,25 +67,14 @@ export default function OrderForm({
 
   const [quantity, setQuantity] = useState(
     Math.min(
-      50,
+      initialVariantStock > 0 ? Math.min(50, initialVariantStock) : 50,
       Math.max(1, Number(initialQuantity) || 1)
     )
   );
 
-  const [size, setSize] = useState(
-    initialSize || DEFAULT_PRODUCT_SIZE
+  const [variantSelections, setVariantSelections] = useState(() =>
+    defaultVariantSelections
   );
-
-  const [color, setColor] = useState(
-    initialColor || DEFAULT_PRODUCT_COLOR
-  );
-
-  // ==========================================
-  // CART VARIANTS
-  // ==========================================
-
-  const [cartSizes, setCartSizes] = useState({});
-  const [cartColors, setCartColors] = useState({});
 
   // ==========================================
   // FORM STATUS
@@ -118,42 +116,6 @@ export default function OrderForm({
   }, [product, fromCart]);
 
   // ==========================================
-  // INITIALIZE CART VARIANTS
-  // ==========================================
-
-  useEffect(() => {
-    if (!fromCart) {
-      return;
-    }
-
-    setCartSizes((previous) => {
-      const next = { ...previous };
-
-      for (const item of cartItems) {
-        if (!next[item.sku]) {
-          next[item.sku] =
-            item.size || DEFAULT_PRODUCT_SIZE;
-        }
-      }
-
-      return next;
-    });
-
-    setCartColors((previous) => {
-      const next = { ...previous };
-
-      for (const item of cartItems) {
-        if (!next[item.sku]) {
-          next[item.sku] =
-            item.color || DEFAULT_PRODUCT_COLOR;
-        }
-      }
-
-      return next;
-    });
-  }, [fromCart, cartItems]);
-
-  // ==========================================
   // PRICE
   // ==========================================
 
@@ -172,6 +134,14 @@ export default function OrderForm({
     product &&
     product.discountPrice &&
     product.discountPrice < product.productPrice;
+  const selectedVariantStock = getSelectedVariantStock(
+    product,
+    variantSelections
+  );
+  const singleCanPurchase =
+    !product ||
+    (product.variants || []).length === 0 ||
+    selectedVariantStock > 0;
 
   // ==========================================
   // ORDER ITEMS
@@ -180,16 +150,7 @@ export default function OrderForm({
   const orderItems = fromCart
     ? cartItems.map((item) => ({
       ...item,
-
-      size:
-        cartSizes[item.sku] ||
-        item.size ||
-        DEFAULT_PRODUCT_SIZE,
-
-      color:
-        cartColors[item.sku] ||
-        item.color ||
-        DEFAULT_PRODUCT_COLOR,
+      variants: getItemVariants(item),
     }))
     : product
       ? [
@@ -199,8 +160,7 @@ export default function OrderForm({
           productImage: product.productImage,
           unitPrice,
           quantity,
-          size,
-          color,
+          variants: variantSelections,
         },
       ]
       : [];
@@ -220,18 +180,19 @@ export default function OrderForm({
     }));
   }
 
-  function updateCartSize(sku, value) {
-    setCartSizes((previous) => ({
-      ...previous,
-      [sku]: value,
-    }));
-  }
+  function updateVariant(typeIndex, value) {
+    const next = selectVariantOption(
+      product,
+      variantSelections,
+      typeIndex,
+      value
+    );
+    const stock = getSelectedVariantStock(product, next);
 
-  function updateCartColor(sku, value) {
-    setCartColors((previous) => ({
-      ...previous,
-      [sku]: value,
-    }));
+    setVariantSelections(next);
+    if (stock > 0) {
+      setQuantity((current) => Math.min(current, stock));
+    }
   }
 
   // ==========================================
@@ -264,8 +225,7 @@ export default function OrderForm({
           productName: item.productName,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
-          size: item.size,
-          color: item.color,
+          variants: item.variants,
         })),
       };
 
@@ -302,13 +262,7 @@ export default function OrderForm({
 
       setQuantity(1);
 
-      setSize(DEFAULT_PRODUCT_SIZE);
-
-      setColor(DEFAULT_PRODUCT_COLOR);
-
-      setCartSizes({});
-
-      setCartColors({});
+      setVariantSelections(getInitialVariantSelections(product));
 
       if (fromCart) {
         clearCart();
@@ -607,7 +561,7 @@ export default function OrderForm({
 
         <button
           type="submit"
-          disabled={status === "loading"}
+          disabled={status === "loading" || (!fromCart && !singleCanPurchase)}
           className="mt-6 w-full inline-flex items-center justify-center px-8 py-4 bg-action text-white text-sm font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors disabled:opacity-60"
         >
           {status === "loading"
@@ -686,19 +640,14 @@ export default function OrderForm({
 
                       <div className="mt-3 space-y-1 text-xs text-grey-700">
 
-                        <p>
-                          <span className="font-semibold">
-                            Size:
-                          </span>{" "}
-                          {item.size}
-                        </p>
-
-                        <p>
-                          <span className="font-semibold">
-                            Color:
-                          </span>{" "}
-                          {item.color}
-                        </p>
+                        {Object.entries(item.variants || {}).map(([key, value]) => (
+                          <p key={key}>
+                            <span className="font-semibold">
+                              {getVariantLabel(item, key)}:
+                            </span>{" "}
+                            {value}
+                          </p>
+                        ))}
 
                         <p>
                           <span className="font-semibold">
@@ -729,41 +678,6 @@ export default function OrderForm({
                     </span>
                   </div>
 
-                  {/* VARIANT CONTROLS */}
-
-                  <div className="grid grid-cols-2 gap-3 mt-4">
-
-                    <SizeSelect
-                      value={
-                        cartSizes[item.sku] ||
-                        item.size ||
-                        DEFAULT_PRODUCT_SIZE
-                      }
-                      onChange={(value) =>
-                        updateCartSize(
-                          item.sku,
-                          value
-                        )
-                      }
-                      id={`cart-size-${item.sku}`}
-                    />
-
-                    <ColorSelect
-                      value={
-                        cartColors[item.sku] ||
-                        item.color ||
-                        DEFAULT_PRODUCT_COLOR
-                      }
-                      onChange={(value) =>
-                        updateCartColor(
-                          item.sku,
-                          value
-                        )
-                      }
-                      id={`cart-color-${item.sku}`}
-                    />
-
-                  </div>
                 </div>
               )
             )}
@@ -861,25 +775,17 @@ export default function OrderForm({
 
             <div className="py-5 border-b border-grey-200 space-y-3">
 
-              <div className="flex justify-between gap-4 text-sm">
-                <span className="text-grey-600">
-                  Size
-                </span>
+              {(product.variantTypes || []).map((type) => (
+                <div className="flex justify-between gap-4 text-sm" key={type.key}>
+                  <span className="text-grey-600">
+                    {type.label}
+                  </span>
 
-                <span className="font-medium text-foreground text-right">
-                  {size}
-                </span>
-              </div>
-
-              <div className="flex justify-between gap-4 text-sm">
-                <span className="text-grey-600">
-                  Color
-                </span>
-
-                <span className="font-medium text-foreground">
-                  {color}
-                </span>
-              </div>
+                  <span className="font-medium text-foreground text-right">
+                    {variantSelections[type.key]}
+                  </span>
+                </div>
+              ))}
 
               <div className="flex justify-between gap-4 text-sm">
                 <span className="text-grey-600">
@@ -895,21 +801,27 @@ export default function OrderForm({
 
             {/* CHANGE VARIANT */}
 
-            <div className="grid grid-cols-2 gap-3 py-5 border-b border-grey-200">
-
-              <SizeSelect
-                value={size}
-                onChange={setSize}
-                id="order-size"
-              />
-
-              <ColorSelect
-                value={color}
-                onChange={setColor}
-                id="order-color"
-              />
-
-            </div>
+            {(product.variantTypes || []).length > 0 && (
+              <div className="grid sm:grid-cols-2 gap-3 py-5 border-b border-grey-200">
+                {product.variantTypes.map((type, typeIndex) => (
+                  <VariantSelect
+                    key={type.key}
+                    type={type}
+                    value={variantSelections[type.key] || ""}
+                    onChange={(value) => updateVariant(typeIndex, value)}
+                    id={`order-variant-${type.key}`}
+                    getStock={(value) =>
+                      getVariantOptionStock(
+                        product,
+                        variantSelections,
+                        typeIndex,
+                        value
+                      )
+                    }
+                  />
+                ))}
+              </div>
+            )}
 
             {/* QUANTITY */}
 
@@ -949,7 +861,7 @@ export default function OrderForm({
                     setQuantity(
                       (current) =>
                         Math.min(
-                          50,
+                          selectedVariantStock > 0 ? selectedVariantStock : 50,
                           current + 1
                         )
                     )
@@ -1035,22 +947,14 @@ export default function OrderForm({
   );
 }
 
-// ==========================================================
-// SIZE SELECT
-// ==========================================================
-
-function SizeSelect({
-  value,
-  onChange,
-  id,
-}) {
+function VariantSelect({ type, value, onChange, id, getStock }) {
   return (
     <label
       className="block"
       htmlFor={id}
     >
       <span className="block text-[10px] font-semibold uppercase tracking-wider text-grey-700 mb-1.5">
-        Size
+        {type.label}
       </span>
 
       <select
@@ -1062,57 +966,21 @@ function SizeSelect({
         }
         className="w-full appearance-none border border-grey-300 bg-white px-3 py-2.5 text-xs text-foreground focus:outline-none focus:border-burgundy"
       >
-        {PRODUCT_SIZES.map(
-          (option) => (
+        {type.values.map(
+          (option) => {
+            const stock = getStock(option);
+
+            return (
             <option
               key={option}
               value={option}
+              disabled={stock < 1}
             >
               {option}
+              {stock < 1 ? " — Out of Stock" : ""}
             </option>
-          )
-        )}
-      </select>
-    </label>
-  );
-}
-
-// ==========================================================
-// COLOR SELECT
-// ==========================================================
-
-function ColorSelect({
-  value,
-  onChange,
-  id,
-}) {
-  return (
-    <label
-      className="block"
-      htmlFor={id}
-    >
-      <span className="block text-[10px] font-semibold uppercase tracking-wider text-grey-700 mb-1.5">
-        Color
-      </span>
-
-      <select
-        id={id}
-        required
-        value={value}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
-        className="w-full appearance-none border border-grey-300 bg-white px-3 py-2.5 text-xs text-foreground focus:outline-none focus:border-burgundy"
-      >
-        {PRODUCT_COLORS.map(
-          (option) => (
-            <option
-              key={option}
-              value={option}
-            >
-              {option}
-            </option>
-          )
+            );
+          }
         )}
       </select>
     </label>

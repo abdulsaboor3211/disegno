@@ -125,15 +125,23 @@ export default async function OrderPage({
     notFound();
   }
 
-  const size =
-    typeof params?.size === "string"
-      ? params.size
-      : undefined;
-
-  const color =
-    typeof params?.color === "string"
-      ? params.color
-      : undefined;
+  let initialVariants = {};
+  if (typeof params?.variants === "string") {
+    try {
+      const parsed = JSON.parse(params.variants);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        initialVariants = parsed;
+      }
+    } catch {
+      initialVariants = {};
+    }
+  } else {
+    // Backward compatibility for old size/color checkout links.
+    initialVariants = {
+      ...(typeof params?.size === "string" && { size: params.size }),
+      ...(typeof params?.color === "string" && { color: params.color }),
+    };
+  }
 
   const quantity = Math.min(
     50,
@@ -171,8 +179,7 @@ export default async function OrderPage({
 
             <OrderForm
               product={product}
-              initialSize={size}
-              initialColor={color}
+              initialVariants={initialVariants}
               initialQuantity={quantity}
             />
 

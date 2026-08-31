@@ -1,5 +1,11 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
+import { getProducts } from "@/lib/googleSheets";
+import {
+  formatVariantLabel,
+  getSelectedVariantStock,
+  normalizeVariantSelections,
+} from "@/lib/variants";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -15,9 +21,9 @@ function normalizeItems(body) {
       productSku: String(item.productSku || item.sku || "").trim(),
       productName: String(item.productName || "").trim(),
       quantity: Number(item.quantity) || 0,
-      unitPrice: Number(item.unitPrice) || 0,
-      size: String(item.size || "").trim(),
-      color: String(item.color || "").trim(),
+      variants: normalizeVariantSelections(
+        item.variants || { size: item.size, color: item.color }
+      ),
     }));
   }
 
@@ -27,9 +33,9 @@ function normalizeItems(body) {
         productSku: String(body.productSku).trim(),
         productName: String(body.productName).trim(),
         quantity: Number(body.quantity) || 0,
-        unitPrice: Number(body.unitPrice) || 0,
-        size: String(body.size || "").trim(),
-        color: String(body.color || "").trim(),
+        variants: normalizeVariantSelections(
+          body.variants || { size: body.size, color: body.color }
+        ),
       },
     ];
   }
@@ -44,8 +50,11 @@ function buildOrderEmail(order) {
       <tr>
         <td style="padding: 8px 0; border-bottom: 1px solid #e8e8e8;">${escapeHtml(item.productSku)}</td>
         <td style="padding: 8px 0; border-bottom: 1px solid #e8e8e8;">${escapeHtml(item.productName)}</td>
-        <td style="padding: 8px 0; border-bottom: 1px solid #e8e8e8;">${escapeHtml(item.size || "—")}</td>
-        <td style="padding: 8px 0; border-bottom: 1px solid #e8e8e8;">${escapeHtml(item.color || "—")}</td>
+        <td style="padding: 8px 0; border-bottom: 1px solid #e8e8e8;">${escapeHtml(
+          Object.entries(item.variants)
+            .map(([key, value]) => `${item.variantLabels[key] || formatVariantLabel(key)}: ${value}`)
+            .join(", ") || "—"
+        )}</td>
         <td style="padding: 8px 0; border-bottom: 1px solid #e8e8e8;">${escapeHtml(item.quantity)}</td>
         <td style="padding: 8px 0; border-bottom: 1px solid #e8e8e8;">Rs. ${item.unitPrice.toLocaleString("en-PK")}</td>
         <td style="padding: 8px 0; border-bottom: 1px solid #e8e8e8;">Rs. ${(item.unitPrice * item.quantity).toLocaleString("en-PK")}</td>
@@ -83,8 +92,7 @@ function buildOrderEmail(order) {
             <tr>
               <th align="left" style="padding: 8px 0; border-bottom: 2px solid #d4d4d4;">SKU</th>
               <th align="left" style="padding: 8px 0; border-bottom: 2px solid #d4d4d4;">Product</th>
-              <th align="left" style="padding: 8px 0; border-bottom: 2px solid #d4d4d4;">Size</th>
-              <th align="left" style="padding: 8px 0; border-bottom: 2px solid #d4d4d4;">Color</th>
+              <th align="left" style="padding: 8px 0; border-bottom: 2px solid #d4d4d4;">Variants</th>
               <th align="left" style="padding: 8px 0; border-bottom: 2px solid #d4d4d4;">Qty</th>
               <th align="left" style="padding: 8px 0; border-bottom: 2px solid #d4d4d4;">Unit</th>
               <th align="left" style="padding: 8px 0; border-bottom: 2px solid #d4d4d4;">Line</th>
@@ -127,33 +135,19 @@ export async function POST(request) {
       );
     }
 
-    const items = normalizeItems(body);
+    const submittedItems = normalizeItems(body);
 
-    if (items.length === 0) {
+    if (submittedItems.length === 0) {
       return NextResponse.json(
         { error: "At least one product is required" },
         { status: 400 }
       );
     }
 
-    for (const item of items) {
+    for (const item of submittedItems) {
       if (!item.productSku || !item.productName) {
         return NextResponse.json(
           { error: "Each item needs SKU and product name" },
-          { status: 400 }
-        );
-      }
-
-      if (!item.size) {
-        return NextResponse.json(
-          { error: "Please select a size for each item" },
-          { status: 400 }
-        );
-      }
-
-      if (!item.color) {
-        return NextResponse.json(
-          { error: "Please select a color for each item" },
           { status: 400 }
         );
       }
@@ -168,6 +162,71 @@ export async function POST(request) {
           { status: 400 }
         );
       }
+    }
+
+    const products = await getProducts();
+    const productsBySku = new Map(
+      products.map((product) => [String(product.sku), product])
+    );
+    const items = [];
+
+    for (const submittedItem of submittedItems) {
+      const product = productsBySku.get(submittedItem.productSku);
+
+      if (!product) {
+        return NextResponse.json(
+          { error: `Product ${submittedItem.productSku} is no longer available` },
+          { status: 400 }
+        );
+      }
+
+      const variantTypes = product.variantTypes || [];
+      const missingType = variantTypes.find(
+        (type) => !submittedItem.variants[type.key]
+      );
+
+      if (missingType) {
+        return NextResponse.json(
+          { error: `Please select ${missingType.label} for ${product.productName}` },
+          { status: 400 }
+        );
+      }
+
+      const hasVariantRows = (product.variants || []).length > 0;
+      const selectedStock = getSelectedVariantStock(
+        product,
+        submittedItem.variants
+      );
+
+      if (hasVariantRows && selectedStock < submittedItem.quantity) {
+        return NextResponse.json(
+          {
+            error:
+              selectedStock > 0
+                ? `Only ${selectedStock} of the selected ${product.productName} variant are available`
+                : `The selected ${product.productName} variant is out of stock`,
+          },
+          { status: 400 }
+        );
+      }
+
+      const hasDiscount =
+        product.discountPrice &&
+        product.discountPrice < product.productPrice;
+
+      items.push({
+        productSku: String(product.sku),
+        productName: product.productName,
+        quantity: submittedItem.quantity,
+        unitPrice: hasDiscount
+          ? product.discountPrice
+          : product.productPrice || 0,
+        variants: submittedItem.variants,
+        variantLabels: variantTypes.reduce((labels, type) => {
+          labels[type.key] = type.label;
+          return labels;
+        }, {}),
+      });
     }
 
     const total = items.reduce(
@@ -234,8 +293,6 @@ export async function POST(request) {
 
     if (error) {
       console.error("[order:resend]", error);
-      console.log(fromEmail)
-      console.log(toEmail)
       return NextResponse.json(
         { error: error.message || "Failed to send order email" },
         { status: 502 }

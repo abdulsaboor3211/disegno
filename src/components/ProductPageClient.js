@@ -6,24 +6,19 @@ import { useMemo, useState } from "react";
 
 import { formatPrice } from "@/data/products";
 
-import {
-    DEFAULT_PRODUCT_COLOR,
-    DEFAULT_PRODUCT_SIZE,
-    PRODUCT_COLORS,
-    PRODUCT_SIZES,
-} from "@/data/sizes";
-
 import { useCart } from "@/context/CartContext";
 
 import { isValidImageSrc } from "@/lib/imageUrl";
 import { trackAddToCart, trackOrderNow } from "@/lib/analytics"; //
+import {
+    getInitialVariantSelections,
+    getSelectedVariantStock,
+    getVariantLabels,
+    getVariantOptionStock,
+    selectVariantOption,
+} from "@/lib/variants";
 
 const BRAND_COLOR = "#7A2230";
-
-function getShortSize(size) {
-    const match = size.match(/UK\s*\*?(\d+)/i);
-    return match ? `UK${match[1]}` : size;
-}
 
 function getProductImages(product) {
     const seen = new Set();
@@ -47,19 +42,14 @@ function getProductImages(product) {
     return images;
 }
 
-// 👇 Get stock for a specific size
-function getSizeStock(product, sizeLabel) {
-    const sizeStockMap = product.sizeStockMap || {};
-    return sizeStockMap[sizeLabel] || 0;
-}
-
 export default function ProductPageClient({ product }) {
     const { addItem } = useCart();
 
     const [selectedImage, setSelectedImage] = useState(null);
     const [quantity, setQuantity] = useState(1);
-    const [size, setSize] = useState(DEFAULT_PRODUCT_SIZE);
-    const [color, setColor] = useState(DEFAULT_PRODUCT_COLOR);
+    const [variants, setVariants] = useState(() =>
+        getInitialVariantSelections(product)
+    );
     const [added, setAdded] = useState(false);
 
     const productImages = useMemo(
@@ -77,31 +67,37 @@ export default function ProductPageClient({ product }) {
 
     const total = unitPrice * quantity;
 
-    const availableSizes = product.availableSizes || [];
-    const sizeStockMap = product.sizeStockMap || {};
+    const variantTypes = product.variantTypes || [];
+    const hasVariantRows = (product.variants || []).length > 0;
+    const selectedStock = getSelectedVariantStock(product, variants);
+    const canPurchase = !hasVariantRows || selectedStock > 0;
 
-    function isSizeAvailable(sizeOption) {
-        if (availableSizes.length === 0) {
-            return true;
-        }
-        return availableSizes.some(
-            (item) => getShortSize(item) === getShortSize(sizeOption)
+    function handleVariantChange(typeIndex, value) {
+        const nextVariants = selectVariantOption(
+            product,
+            variants,
+            typeIndex,
+            value
         );
-    }
+        const nextStock = getSelectedVariantStock(product, nextVariants);
 
-    function getStockForSize(sizeOption) {
-        return sizeStockMap[sizeOption] || 0;
+        setVariants(nextVariants);
+        if (nextStock > 0) {
+            setQuantity((current) => Math.min(current, nextStock));
+        }
     }
 
     /*
      * Add to cart with selected variant
      */
     function handleAddToCart() {
-        const variant = { size, color };
-        trackAddToCart(product, quantity, variant);
+        if (!canPurchase) return;
+
+        trackAddToCart(product, quantity, variants);
         addItem(product, quantity, {
-            size,
-            color,
+            variants,
+            variantLabels: getVariantLabels(product),
+            maxQuantity: selectedStock > 0 ? selectedStock : 50,
         });
 
         setAdded(true);
@@ -115,13 +111,13 @@ export default function ProductPageClient({ product }) {
      * Buy Now - Pass selected variant to checkout
      */
     function handleBuyNow() {
-        const variant = { size, color };
-        trackOrderNow(product, quantity, variant);
+        if (!canPurchase) return;
+
+        trackOrderNow(product, quantity, variants);
 
         const params = new URLSearchParams({
             sku: product.sku,
-            size,
-            color,
+            variants: JSON.stringify(variants),
             quantity: String(quantity),
         });
 
@@ -245,69 +241,60 @@ export default function ProductPageClient({ product }) {
                                 </div>
                             )}
 
-                            {/* 👇 SIZE WITH STOCK DISPLAY */}
-                            <div className="mb-6">
-                                <div className="flex items-center justify-between mb-2">
-                                    <label
-                                        htmlFor="product-size"
-                                        className="text-sm font-semibold uppercase tracking-wider text-foreground"
+                            {variantTypes.map((type, typeIndex) => (
+                                <div className="mb-6" key={type.key}>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <label
+                                            htmlFor={`product-variant-${type.key}`}
+                                            className="text-sm font-semibold uppercase tracking-wider text-foreground"
+                                        >
+                                            {type.label}
+                                        </label>
+                                        {typeIndex === variantTypes.length - 1 && (
+                                            <span className="text-xs text-grey-500">
+                                                {selectedStock > 0
+                                                    ? `${selectedStock} available`
+                                                    : "Out of stock"}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <select
+                                        id={`product-variant-${type.key}`}
+                                        value={variants[type.key] || ""}
+                                        onChange={(event) =>
+                                            handleVariantChange(typeIndex, event.target.value)
+                                        }
+                                        className="w-full appearance-none border-2 border-foreground bg-white px-3 py-3 text-sm text-foreground focus:outline-none focus:border-burgundy"
                                     >
-                                        Size
-                                    </label>
-                                    <span className="text-xs text-grey-500">
-                                        {availableSizes.length > 0
-                                            ? `${availableSizes.length} in stock`
-                                            : "Check availability"}
-                                    </span>
+                                        {type.values.map((option) => {
+                                            const optionStock = getVariantOptionStock(
+                                                product,
+                                                variants,
+                                                typeIndex,
+                                                option
+                                            );
+
+                                            return (
+                                                <option
+                                                    key={option}
+                                                    value={option}
+                                                    disabled={optionStock < 1}
+                                                >
+                                                    {option}
+                                                    {optionStock < 1 ? " — Out of Stock" : ""}
+                                                </option>
+                                            );
+                                        })}
+                                    </select>
                                 </div>
+                            ))}
 
-                                <select
-                                    id="product-size"
-                                    value={size}
-                                    onChange={(event) => setSize(event.target.value)}
-                                    className="w-full appearance-none border-2 border-foreground bg-white px-3 py-3 text-sm text-foreground focus:outline-none focus:border-burgundy"
-                                >
-                                    {PRODUCT_SIZES.map((option) => {
-                                        const stock = getStockForSize(option);
-                                        const available = stock > 0;
-
-                                        return (
-                                            <option
-                                                key={option}
-                                                value={option}
-                                                disabled={!available}
-                                            >
-                                                {option}
-                                                {!available
-                                                    ? " — Out of Stock"
-                                                    : ` (${stock} available)`}
-                                            </option>
-                                        );
-                                    })}
-                                </select>
-                            </div>
-
-                            {/* Color */}
-                            <div className="mb-6">
-                                <label
-                                    htmlFor="product-color"
-                                    className="block text-sm font-semibold uppercase tracking-wider text-foreground mb-2"
-                                >
-                                    Color
-                                </label>
-                                <select
-                                    id="product-color"
-                                    value={color}
-                                    onChange={(event) => setColor(event.target.value)}
-                                    className="w-full appearance-none border-2 border-foreground bg-white px-3 py-3 text-sm text-foreground focus:outline-none focus:border-burgundy"
-                                >
-                                    {PRODUCT_COLORS.map((option) => (
-                                        <option key={option} value={option}>
-                                            {option}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                            {hasVariantRows && !canPurchase && (
+                                <p className="mb-6 text-sm font-medium text-burgundy">
+                                    This product is currently out of stock.
+                                </p>
+                            )}
 
                             {/* Quantity */}
                             <div className="mb-6">
@@ -330,7 +317,12 @@ export default function ProductPageClient({ product }) {
                                     <button
                                         type="button"
                                         onClick={() =>
-                                            setQuantity((current) => Math.min(50, current + 1))
+                                            setQuantity((current) =>
+                                                Math.min(
+                                                    selectedStock > 0 ? selectedStock : 50,
+                                                    current + 1
+                                                )
+                                            )
                                         }
                                         className="w-11 h-11 text-lg text-grey-700 hover:bg-grey-100"
                                     >
@@ -354,14 +346,16 @@ export default function ProductPageClient({ product }) {
                                 <button
                                     type="button"
                                     onClick={handleAddToCart}
-                                    className="w-full px-6 py-3.5 border-2 border-burgundy text-burgundy text-sm font-semibold uppercase tracking-wider hover:bg-action hover:text-white transition-colors"
+                                    disabled={!canPurchase}
+                                    className="w-full px-6 py-3.5 border-2 border-burgundy text-burgundy text-sm font-semibold uppercase tracking-wider hover:bg-action hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     {added ? "Added ✓" : "Add to Cart"}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={handleBuyNow}
-                                    className="w-full px-6 py-3.5 bg-action text-white text-sm font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors"
+                                    disabled={!canPurchase}
+                                    className="w-full px-6 py-3.5 bg-action text-white text-sm font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     Buy Now
                                 </button>
