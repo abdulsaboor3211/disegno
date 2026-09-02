@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 
 import { formatPrice } from "@/data/products";
 
@@ -9,6 +10,11 @@ import { useCart } from "@/context/CartContext";
 
 import { isValidImageSrc } from "@/lib/imageUrl";
 import { getItemVariants, getVariantLabel } from "@/lib/variants";
+import {
+  trackAddToCart,
+  trackRemoveFromCart,
+  trackViewCart,
+} from "@/lib/analytics";
 
 export default function CartPageContent() {
   const {
@@ -19,6 +25,42 @@ export default function CartPageContent() {
     removeItem,
     itemCount,
   } = useCart();
+
+  const cartViewTracked = useRef(false);
+
+  useEffect(() => {
+    if (
+      !ready ||
+      cartViewTracked.current ||
+      items.length === 0
+    ) {
+      return;
+    }
+
+    trackViewCart(items, subtotal);
+    cartViewTracked.current = true;
+  }, [items, ready, subtotal]);
+
+  function handleQuantityChange(item, requestedQuantity) {
+    const nextQuantity = Math.min(
+      item.maxQuantity || 50,
+      Math.max(0, requestedQuantity)
+    );
+    const difference = nextQuantity - item.quantity;
+
+    if (difference > 0) {
+      trackAddToCart(item, difference);
+    } else if (difference < 0) {
+      trackRemoveFromCart(item, Math.abs(difference));
+    }
+
+    updateQuantity(item.id, nextQuantity);
+  }
+
+  function handleRemoveItem(item) {
+    trackRemoveFromCart(item, item.quantity);
+    removeItem(item.id);
+  }
 
   if (!ready) {
     return (
@@ -124,10 +166,7 @@ export default function CartPageContent() {
                     type="button"
                     aria-label="Decrease quantity"
                     onClick={() =>
-                      updateQuantity(
-                        item.id,
-                        item.quantity - 1
-                      )
+                      handleQuantityChange(item, item.quantity - 1)
                     }
                     className="w-9 h-9 text-lg text-grey-700 hover:bg-grey-100"
                   >
@@ -142,10 +181,7 @@ export default function CartPageContent() {
                     type="button"
                     aria-label="Increase quantity"
                     onClick={() =>
-                      updateQuantity(
-                        item.id,
-                        item.quantity + 1
-                      )
+                      handleQuantityChange(item, item.quantity + 1)
                     }
                     className="w-9 h-9 text-lg text-grey-700 hover:bg-grey-100"
                   >
@@ -166,11 +202,7 @@ export default function CartPageContent() {
 
                   <button
                     type="button"
-                    onClick={() =>
-                      removeItem(
-                        item.id
-                      )
-                    }
+                    onClick={() => handleRemoveItem(item)}
                     className="text-xs uppercase tracking-wider text-grey-500 hover:text-burgundy"
                   >
                     Remove

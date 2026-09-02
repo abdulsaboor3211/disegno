@@ -8,7 +8,7 @@ import { formatPrice } from "@/data/products";
 import { PRODUCT_SIZES } from "@/data/sizes";
 import { useCart } from "@/context/CartContext";
 import { isValidImageSrc } from "@/lib/imageUrl";
-import { trackAddToCart, trackOrderNow } from "@/lib/analytics"; // 👈 Add this
+import { trackAddToCart, trackSelectItem } from "@/lib/analytics";
 
 function getShortSize(size) {
   const match = size.match(/UK\s*(\d+)/i);
@@ -29,7 +29,12 @@ function getContrastColor(hex) {
 
 const BRAND_COLOR = "#7A2230";
 
-export default function ProductCard({ product }) {
+export default function ProductCard({
+  product,
+  itemListId = "all_products",
+  itemListName = "All Products",
+  itemIndex = 0,
+}) {
   const { addItem } = useCart();
 
   const [added, setAdded] = useState(false);
@@ -52,16 +57,15 @@ export default function ProductCard({ product }) {
   const hasImage = isValidImageSrc(product.productImage);
 
   const sizeStockMap = product.sizeStockMap || {};
-  const availableSizes = product.availableSizes || [];
+  const analyticsContext = {
+    itemListId,
+    itemListName,
+    index: itemIndex,
+  };
 
   function handleAddToCart() {
-    // 👇 Track Add to Cart event
-    const variant = {
-      size: availableSizes.length > 0 ? availableSizes[0] : null,
-    };
-    trackAddToCart(product, 1, variant);
-
-    addItem(product, 1);
+    addItem(product, 1, { analytics: analyticsContext });
+    trackAddToCart(product, 1, undefined, analyticsContext);
 
     setAdded(true);
 
@@ -70,12 +74,8 @@ export default function ProductCard({ product }) {
     }, 1600);
   }
 
-  function handleOrderNow() {
-    // 👇 Track Order Now event
-    const variant = {
-      size: availableSizes.length > 0 ? availableSizes[0] : null,
-    };
-    trackOrderNow(product, 1, variant);
+  function handleProductSelect() {
+    trackSelectItem(product, analyticsContext);
   }
 
   return (
@@ -86,6 +86,7 @@ export default function ProductCard({ product }) {
         <Link
           href={productHref}
           className="relative block w-full h-full"
+          onClick={handleProductSelect}
         >
           {hasImage ? (
             <Image
@@ -108,7 +109,7 @@ export default function ProductCard({ product }) {
       {/* PRODUCT INFORMATION */}
       <div className="p-4 flex flex-col flex-1 border-t border-grey-200">
 
-        <Link href={productHref}>
+        <Link href={productHref} onClick={handleProductSelect}>
           <h3 className="font-serif text-base font-semibold text-foreground leading-snug mb-4 group-hover:text-burgundy transition-colors">
             {product.productName}
           </h3>
@@ -173,7 +174,7 @@ export default function ProductCard({ product }) {
             </button>
             <Link
               href={orderHref}
-              onClick={handleOrderNow} // 👈 Add tracking
+              onClick={handleProductSelect}
               className="flex-1 text-center px-3 py-2 bg-action text-white text-xs font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors"
             >
               Order Now

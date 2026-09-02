@@ -117,6 +117,8 @@ export function CartProvider({ children }) {
             item.id === itemId
               ? {
                 ...item,
+                category: item.category || product.category || "",
+                analytics: item.analytics || options.analytics || null,
                 maxQuantity: Math.min(item.maxQuantity || 50, maxQuantity),
                 quantity: Math.min(
                   Math.min(item.maxQuantity || 50, maxQuantity),
@@ -136,6 +138,8 @@ export function CartProvider({ children }) {
 
             productName: product.productName,
 
+            category: product.category || "",
+
             productImage: product.productImage,
 
             productPrice: product.productPrice,
@@ -151,6 +155,8 @@ export function CartProvider({ children }) {
             variants,
 
             variantLabels: options.variantLabels || {},
+
+            analytics: options.analytics || null,
           },
         ];
       });

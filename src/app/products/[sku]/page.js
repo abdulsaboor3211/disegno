@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
+import { ProductViewTracker } from "@/components/AnalyticsTrackers";
 import { formatPrice } from "@/data/products";
 import { getProductBySku } from "@/lib/googleSheets";
 import { isValidImageSrc } from "@/lib/imageUrl";
@@ -105,6 +106,7 @@ export default async function ProductPage({ params }) {
   return (
     <>
       <JsonLd data={productSchema} />
+      <ProductViewTracker product={product} />
 
       <Header />
 

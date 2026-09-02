@@ -1,0 +1,171 @@
+{
+  "input": "C:\\Users\\LENOVO\\OneDrive\\Documents\\programming\\disegno\\SMM_Applied_Class_Plan.docx",
+  "fonts_by_char_count": {
+    "Aptos": 4889,
+    "Aptos Display": 79
+  },
+  "direct_run_formatting_runs": 97,
+  "direct_paragraph_formatting_paragraphs": 90,
+  "heading_like_paragraphs_not_heading_style": [
+    {
+      "para_index": 1,
+      "text": "Applied Social Media Marketing Class Plan",
+      "style": "Normal"
+    },
+    {
+      "para_index": 19,
+      "text": "10-Week / 20-Session Execution Roadmap",
+      "style": "Normal"
+    },
+    {
+      "para_index": 21,
+      "text": "Schedule",
+      "style": "Normal"
+    },
+    {
+      "para_index": 23,
+      "text": "Duration",
+      "style": "Normal"
+    },
+    {
+      "para_index": 25,
+      "text": "Core method",
+      "style": "Normal"
+    },
+    {
+      "para_index": 27,
+      "text": "Teacher role",
+      "style": "Normal"
+    },
+    {
+      "para_index": 29,
+      "text": "SATURDAY | REVIEW & DEFEND",
+      "style": "Normal"
+    },
+    {
+      "para_index": 30,
+      "text": "SUNDAY | BUILD & COMMIT",
+      "style": "Normal"
+    },
+    {
+      "para_index": 31,
+      "text": "MON-FRI | FIELDWORK",
+      "style": "Normal"
+    },
+    {
+      "para_index": 35,
+      "text": "WK",
+      "style": "Normal"
+    },
+    {
+      "para_index": 36,
+      "text": "FOCUS",
+      "style": "Normal"
+    },
+    {
+      "para_index": 37,
+      "text": "SATURDAY 1-2 PM",
+      "style": "Normal"
+    },
+    {
+      "para_index": 38,
+      "text": "SUNDAY 1-2 PM",
+      "style": "Normal"
+    },
+    {
+      "para_index": 39,
+      "text": "MONDAY-FRIDAY DELIVERABLE",
+      "style": "Normal"
+    },
+    {
+      "para_index": 40,
+      "text": "1",
+      "style": "Normal"
+    },
+    {
+      "para_index": 41,
+      "text": "Business onboarding & baseline",
+      "style": "Normal"
+    },
+    {
+      "para_index": 45,
+      "text": "2",
+      "style": "Normal"
+    },
+    {
+      "para_index": 46,
+      "text": "Branding basics",
+      "style": "Normal"
+    },
+    {
+      "para_index": 50,
+      "text": "3",
+      "style": "Normal"
+    },
+    {
+      "para_index": 51,
+      "text": "Marketing basics",
+      "style": "Normal"
+    }
+  ],
+  "examples": {
+    "direct_paragraph_formatting": [
+      {
+        "para_index": 1,
+        "text": "Applied Social Media Marketing Class Plan",
+        "style": "Normal"
+      },
+      {
+        "para_index": 2,
+        "text": "Real local businesses | Experiment-driven learning | 10 weekends | 20 x 1-hour classes",
+        "style": "Normal"
+      },
+      {
+        "para_index": 3,
+        "text": "Purpose: Students learn the basics of branding and marketing by managing a scoped, approved social media project for an ",
+        "style": "Normal"
+      },
+      {
+        "para_index": 4,
+        "text": "How the course works",
+        "style": "Heading 1"
+      },
+      {
+        "para_index": 5,
+        "text": "Each student is assigned one local business and begins with a short discovery interview, approval boundaries, and baseli",
+        "style": "List Bullet"
+      }
+    ],
+    "direct_run_formatting": [
+      {
+        "para_index": 1,
+        "run_text": "Applied Social Media Marketing Class Plan",
+        "style": "Normal"
+      },
+      {
+        "para_index": 2,
+        "run_text": "Real local businesses | Experiment-driven learning | 10 weekends | 20 x 1-hour c",
+        "style": "Normal"
+      },
+      {
+        "para_index": 3,
+        "run_text": "Purpose: Students learn the basics of branding and marketing by managing a scope",
+        "style": "Normal"
+      },
+      {
+        "para_index": 4,
+        "run_text": "How the course works",
+        "style": "Heading 1"
+      },
+      {
+        "para_index": 5,
+        "run_text": "Each student is assigned one local business and begins with a short discovery in",
+        "style": "List Bullet"
+      }
+    ]
+  },
+  "notes": [
+    "Direct formatting is not always wrong, but it often causes inconsistent output when templates change.",
+    "Heading-like paragraphs not using Heading styles can break TOC and accessibility."
+  ]
+}

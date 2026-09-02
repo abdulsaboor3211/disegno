@@ -1,0 +1,123 @@
+{
+  "input": "C:\\Users\\LENOVO\\OneDrive\\Documents\\claude cowork\\architech\\smm\\SMM_Course_Syllabus_and_Class_Plan.docx",
+  "fonts_by_char_count": {},
+  "direct_run_formatting_runs": 22,
+  "direct_paragraph_formatting_paragraphs": 6,
+  "heading_like_paragraphs_not_heading_style": [
+    {
+      "para_index": 1,
+      "text": "Course Syllabus & 20-Class Lesson Plan",
+      "style": "Normal"
+    },
+    {
+      "para_index": 8,
+      "text": "Level",
+      "style": "Normal"
+    },
+    {
+      "para_index": 9,
+      "text": "Tier",
+      "style": "Normal"
+    },
+    {
+      "para_index": 10,
+      "text": "Focus Area / Skill ",
+      "style": "Normal"
+    },
+    {
+      "para_index": 11,
+      "text": "Core Competencies Evaluated",
+      "style": "Normal"
+    },
+    {
+      "para_index": 52,
+      "text": "Class #",
+      "style": "Normal"
+    },
+    {
+      "para_index": 53,
+      "text": "Core Focus",
+      "style": "Normal"
+    },
+    {
+      "para_index": 54,
+      "text": "Tangible Learning Topics (1 hour Discussion + 1 hour Practical)",
+      "style": "Normal"
+    },
+    {
+      "para_index": 98,
+      "text": "Class #",
+      "style": "Normal"
+    },
+    {
+      "para_index": 99,
+      "text": "Core Focus",
+      "style": "Normal"
+    },
+    {
+      "para_index": 100,
+      "text": "Tangible Learning Topics (1 hour Discussion + 1 hour Practical)",
+      "style": "Normal"
+    }
+  ],
+  "examples": {
+    "direct_paragraph_formatting": [
+      {
+        "para_index": 1,
+        "text": "Course Syllabus & 20-Class Lesson Plan",
+        "style": "Normal"
+      },
+      {
+        "para_index": 2,
+        "text": "Part 1: ",
+        "style": "Heading 1"
+      },
+      {
+        "para_index": 3,
+        "text": "Course Syllabus (10 Levels)",
+        "style": "Heading 1"
+      },
+      {
+        "para_index": 5,
+        "text": "Part 2: ",
+        "style": "Heading 1"
+      },
+      {
+        "para_index": 6,
+        "text": "20-Class Lesson Plan (1 Hour Each)",
+        "style": "Heading 1"
+      }
+    ],
+    "direct_run_formatting": [
+      {
+        "para_index": 1,
+        "run_text": "Course Syllabus & 20-Class Lesson Plan",
+        "style": "Normal"
+      },
+      {
+        "para_index": 2,
+        "run_text": "Part 1: ",
+        "style": "Heading 1"
+      },
+      {
+        "para_index": 5,
+        "run_text": "Part 2: ",
+        "style": "Heading 1"
+      },
+      {
+        "para_index": 8,
+        "run_text": "Level",
+        "style": "Normal"
+      },
+      {
+        "para_index": 9,
+        "run_text": "Tier",
+        "style": "Normal"
+      }
+    ]
+  },
+  "notes": [
+    "Direct formatting is not always wrong, but it often causes inconsistent output when templates change.",
+    "Heading-like paragraphs not using Heading styles can break TOC and accessibility."
+  ]
+}

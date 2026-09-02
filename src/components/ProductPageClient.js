@@ -9,7 +9,8 @@ import { formatPrice } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 
 import { isValidImageSrc } from "@/lib/imageUrl";
-import { trackAddToCart, trackOrderNow } from "@/lib/analytics"; //
+import { trackAddToCart } from "@/lib/analytics";
+import { ProductViewTracker } from "@/components/AnalyticsTrackers";
 import {
     getInitialVariantSelections,
     getSelectedVariantStock,
@@ -113,8 +114,6 @@ export default function ProductPageClient({ product }) {
     function handleBuyNow() {
         if (!canPurchase) return;
 
-        trackOrderNow(product, quantity, variants);
-
         const params = new URLSearchParams({
             sku: product.sku,
             variants: JSON.stringify(variants),
@@ -128,6 +127,7 @@ export default function ProductPageClient({ product }) {
 
     return (
         <main className="bg-cream border-b border-grey-200">
+            <ProductViewTracker product={product} />
             <section className="py-10 sm:py-14">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 

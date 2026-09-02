@@ -4,6 +4,7 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
+import { ProductListViewTracker } from "@/components/AnalyticsTrackers";
 import { getProducts, getCategoriesFromSheet } from "@/lib/googleSheets";
 import { isValidImageSrc } from "@/lib/imageUrl";
 
@@ -37,6 +38,8 @@ export default async function CategoryPage({ params }) {
     const categoryProducts = products.filter(
         (product) => product.category === category.name
     );
+    const itemListId = `category_${category.slug}`;
+    const itemListName = `${category.name} Category`;
 
     return (
         <>
@@ -82,11 +85,24 @@ export default async function CategoryPage({ params }) {
 
                         {/* Product Grid */}
                         {categoryProducts.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                                {categoryProducts.map((product) => (
-                                    <ProductCard key={product.sku} product={product} />
-                                ))}
-                            </div>
+                            <>
+                                <ProductListViewTracker
+                                    products={categoryProducts}
+                                    itemListId={itemListId}
+                                    itemListName={itemListName}
+                                />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                                    {categoryProducts.map((product, index) => (
+                                        <ProductCard
+                                            key={product.sku}
+                                            product={product}
+                                            itemListId={itemListId}
+                                            itemListName={itemListName}
+                                            itemIndex={index}
+                                        />
+                                    ))}
+                                </div>
+                            </>
                         ) : (
                             <div className="text-center py-16 bg-white border border-grey-200">
                                 <p className="text-grey-500">No products found in this category.</p>

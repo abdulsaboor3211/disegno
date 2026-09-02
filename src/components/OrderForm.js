@@ -2,10 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { formatPrice } from "@/data/products";
-import { trackCheckout } from "@/lib/analytics";
+import {
+  trackAddPaymentInfo,
+  trackAddShippingInfo,
+  trackBeginCheckout,
+  trackPurchase,
+} from "@/lib/analytics";
 import { useCart } from "@/context/CartContext";
 import { isValidImageSrc } from "@/lib/imageUrl";
 import {
@@ -147,27 +152,56 @@ export default function OrderForm({
   // ORDER ITEMS
   // ==========================================
 
-  const orderItems = fromCart
-    ? cartItems.map((item) => ({
-      ...item,
-      variants: getItemVariants(item),
-    }))
-    : product
-      ? [
-        {
-          sku: product.sku,
-          productName: product.productName,
-          productImage: product.productImage,
-          unitPrice,
-          quantity,
-          variants: variantSelections,
-        },
-      ]
-      : [];
+  const orderItems = useMemo(
+    () =>
+      fromCart
+        ? cartItems.map((item) => ({
+          ...item,
+          variants: getItemVariants(item),
+        }))
+        : product
+          ? [
+            {
+              sku: product.sku,
+              productName: product.productName,
+              productImage: product.productImage,
+              category: product.category,
+              productPrice: product.productPrice,
+              discountPrice: product.discountPrice,
+              unitPrice,
+              quantity,
+              variants: variantSelections,
+              variantLabels: (product.variantTypes || []).reduce(
+                (labels, type) => ({ ...labels, [type.key]: type.label }),
+                {}
+              ),
+            },
+          ]
+          : [],
+    [cartItems, fromCart, product, quantity, unitPrice, variantSelections]
+  );
 
   const displayTotal = fromCart
     ? subtotal
     : singleTotal;
+
+  const checkoutStarted = useRef(false);
+  const shippingInfoAdded = useRef(false);
+  const paymentInfoAdded = useRef(false);
+
+  useEffect(() => {
+    if (
+      checkoutStarted.current ||
+      status === "success" ||
+      (fromCart && !ready) ||
+      orderItems.length === 0
+    ) {
+      return;
+    }
+
+    trackBeginCheckout(orderItems, displayTotal);
+    checkoutStarted.current = true;
+  }, [displayTotal, fromCart, orderItems, ready, status]);
 
   // ==========================================
   // HELPERS
@@ -214,6 +248,16 @@ export default function OrderForm({
       return;
     }
 
+    if (!shippingInfoAdded.current) {
+      trackAddShippingInfo(orderItems, displayTotal, "Standard delivery");
+      shippingInfoAdded.current = true;
+    }
+
+    if (!paymentInfoAdded.current) {
+      trackAddPaymentInfo(orderItems, displayTotal, "Cash on delivery");
+      paymentInfoAdded.current = true;
+    }
+
     try {
       const payload = {
         ...customer,
@@ -248,6 +292,8 @@ export default function OrderForm({
           "Failed to place order"
         );
       }
+
+      trackPurchase(orderItems, displayTotal, data.orderId);
 
       setOrderId(data.orderId || "");
       setStatus("success");
@@ -348,6 +394,9 @@ export default function OrderForm({
             <button
               type="button"
               onClick={() => {
+                checkoutStarted.current = false;
+                shippingInfoAdded.current = false;
+                paymentInfoAdded.current = false;
                 setStatus("idle");
                 setMessage("");
                 setOrderId("");
