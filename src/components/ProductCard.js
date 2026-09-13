@@ -141,11 +141,13 @@ export default function ProductCard({
               {PRODUCT_SIZES.map((size) => {
                 const stock = sizeStockMap[size] || 0;
                 const isAvailable = stock > 0;
+                const stockLabel = `${getShortSize(size)} — ${isAvailable ? `${stock} in stock` : "Out of stock"}`;
 
                 return (
                   <span
                     key={size}
-                    title={`${getShortSize(size)}${isAvailable ? ` — ${stock} in stock` : " — Out of stock"}`}
+                    aria-label={stockLabel}
+                    tabIndex={0}
                     className="px-1.5 py-1 rounded text-[9px] font-semibold relative group/size"
                     style={{
                       backgroundColor: isAvailable ? BRAND_COLOR : "#E5E7EB",
@@ -154,8 +156,8 @@ export default function ProductCard({
                     }}
                   >
                     {getShortSize(size)}
-                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 bg-foreground text-white text-[8px] px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover/size:opacity-100 transition-opacity">
-                      {isAvailable ? `${stock} left` : "Out of stock"}
+                    <span aria-hidden="true" className="pointer-events-none invisible absolute bottom-full mb-1 left-1/2 z-10 -translate-x-1/2 bg-foreground text-white text-[8px] px-1.5 py-0.5 rounded whitespace-nowrap group-hover/size:visible group-focus/size:visible">
+                      {stockLabel}
                     </span>
                   </span>
                 );
