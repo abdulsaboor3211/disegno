@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import Turnstile from "@/components/Turnstile";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { formatPrice } from "@/data/products";
@@ -88,6 +89,9 @@ export default function OrderForm({
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
   const [orderId, setOrderId] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [verificationAttempt, setVerificationAttempt] = useState(0);
+  const submitting = useRef(false);
 
   // ==========================================
   // PRODUCT IMAGES
@@ -236,6 +240,13 @@ export default function OrderForm({
   async function handleSubmit(event) {
     event.preventDefault();
 
+    if (submitting.current) return;
+    if (!turnstileToken) {
+      setStatus("error");
+      setMessage("Please complete the security check before submitting.");
+      return;
+    }
+
     setStatus("loading");
     setMessage("");
 
@@ -258,9 +269,11 @@ export default function OrderForm({
       paymentInfoAdded.current = true;
     }
 
+    submitting.current = true;
     try {
       const payload = {
         ...customer,
+        turnstileToken,
 
         paymentMethod,
 
@@ -320,6 +333,10 @@ export default function OrderForm({
         error.message ||
         "Something went wrong."
       );
+    } finally {
+      submitting.current = false;
+      setTurnstileToken("");
+      setVerificationAttempt((attempt) => attempt + 1);
     }
   }
 
@@ -597,6 +614,8 @@ export default function OrderForm({
 
         {/* ERROR */}
 
+        <Turnstile key={verificationAttempt} action="order" onVerify={setTurnstileToken} />
+
         {status === "error" && (
           <p
             className="mt-5 text-sm text-burgundy border border-burgundy/30 bg-red-50 p-3"
@@ -610,7 +629,7 @@ export default function OrderForm({
 
         <button
           type="submit"
-          disabled={status === "loading" || (!fromCart && !singleCanPurchase)}
+          disabled={status === "loading" || !turnstileToken || (!fromCart && !singleCanPurchase)}
           className="mt-6 w-full inline-flex items-center justify-center px-8 py-4 bg-action text-white text-sm font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors disabled:opacity-60"
         >
           {status === "loading"

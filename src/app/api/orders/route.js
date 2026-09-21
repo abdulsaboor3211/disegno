@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
+import { verifyTurnstile } from "@/lib/turnstile";
 import { getProducts } from "@/lib/googleSheets";
 import {
   formatVariantLabel,
@@ -109,6 +110,13 @@ function buildOrderEmail(order) {
 export async function POST(request) {
   try {
     const body = await request.json();
+    const verification = await verifyTurnstile(body?.turnstileToken, "order");
+    if (!verification.success) {
+      return NextResponse.json(
+        { error: verification.error },
+        { status: verification.status }
+      );
+    }
 
     const whatsapp = String(body.whatsapp || "").trim();
     const address = String(body.address || "").trim();

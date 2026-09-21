@@ -20,6 +20,31 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Form security
+
+Contact messages and all checkout flows require Cloudflare Turnstile. Set
+`TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` in `.env` locally and in your
+hosting provider's environment settings for deployment. Only the public site key
+is exposed through `/api/turnstile`; the secret is used exclusively by the server.
+
+Configure `disegnoproducts.com` and `www.disegnoproducts.com` as allowed hostnames
+in your Cloudflare widget. For preview domains, set `TURNSTILE_ALLOWED_HOSTNAMES`
+to a comma-separated list of all permitted hostnames and add them in Cloudflare.
+Local development permits `localhost` and `127.0.0.1` on the server, but the
+widget must also allow the hostname in Cloudflare. Restart after changing env vars.
+
+Both submission APIs validate every token with Cloudflare, require the matching
+form action and allowed hostname, and block requests on missing keys, invalid or
+reused tokens, and verification outages. Verification occurs before product
+lookups, email delivery, or preview-success responses. The browser refreshes
+verification after every submitted request. The tracking page is currently a
+local mock lookup with no submission API or real order data.
+
+Run `npm run test:security` for mocked verification and API integration tests;
+these tests never send email or create real orders. Turnstile reduces automated
+abuse but cannot guarantee that every bot is blocked. Hosting-level rate limits
+can provide additional protection against high-volume requests.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

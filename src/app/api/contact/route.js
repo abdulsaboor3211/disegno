@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -12,6 +13,14 @@ function escapeHtml(value) {
 export async function POST(request) {
   try {
     const body = await request.json();
+    const verification = await verifyTurnstile(body?.turnstileToken, "contact");
+    if (!verification.success) {
+      return NextResponse.json(
+        { error: verification.error },
+        { status: verification.status }
+      );
+    }
+
     const name = String(body.name || "").trim();
     const email = String(body.email || "").trim();
     const whatsapp = String(body.whatsapp || "").trim();

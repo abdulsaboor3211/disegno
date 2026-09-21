@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import Turnstile from "@/components/Turnstile";
 
 const initialForm = {
   name: "",
@@ -13,6 +14,9 @@ export default function ContactForm() {
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [verificationAttempt, setVerificationAttempt] = useState(0);
+  const submitting = useRef(false);
 
   function updateField(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -20,6 +24,13 @@ export default function ContactForm() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (submitting.current) return;
+    if (!turnstileToken) {
+      setStatus("error");
+      setMessage("Please complete the security check before submitting.");
+      return;
+    }
+    submitting.current = true;
     setStatus("loading");
     setMessage("");
 
@@ -27,7 +38,7 @@ export default function ContactForm() {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, turnstileToken }),
       });
 
       const data = await response.json();
@@ -46,6 +57,10 @@ export default function ContactForm() {
     } catch (error) {
       setStatus("error");
       setMessage(error.message || "Something went wrong");
+    } finally {
+      submitting.current = false;
+      setTurnstileToken("");
+      setVerificationAttempt((attempt) => attempt + 1);
     }
   }
 
@@ -140,6 +155,8 @@ export default function ContactForm() {
         />
       </label>
 
+      <Turnstile key={verificationAttempt} action="contact" onVerify={setTurnstileToken} />
+
       {status === "error" && (
         <p className="text-sm text-burgundy" role="alert">
           {message}
@@ -148,7 +165,7 @@ export default function ContactForm() {
 
       <button
         type="submit"
-        disabled={status === "loading"}
+        disabled={status === "loading" || !turnstileToken}
         className="w-full inline-flex items-center justify-center px-8 py-3.5 bg-action text-white text-sm font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors disabled:opacity-60"
       >
         {status === "loading" ? "Sending…" : "Send message"}
