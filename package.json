@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:analytics": "node --test tests/analytics.test.mjs",
+    "test:images": "node --test tests/imageUrl.test.mjs",
+    "test:variants": "node --experimental-vm-modules --test tests/variants.test.mjs",
     "test:security": "node --experimental-vm-modules --test tests/turnstile.test.mjs"
   },
   "dependencies": {

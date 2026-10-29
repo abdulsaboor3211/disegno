@@ -5,29 +5,15 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { formatPrice } from "@/data/products";
-import { PRODUCT_SIZES } from "@/data/sizes";
 import { useCart } from "@/context/CartContext";
 import { isValidImageSrc } from "@/lib/imageUrl";
 import { trackAddToCart, trackSelectItem } from "@/lib/analytics";
-
-function getShortSize(size) {
-  const match = size.match(/UK\s*(\d+)/i);
-  return match ? `UK${match[1]}` : size;
-}
-
-function getContrastColor(hex) {
-  const color = hex.replace("#", "");
-
-  const r = parseInt(color.substring(0, 2), 16);
-  const g = parseInt(color.substring(2, 4), 16);
-  const b = parseInt(color.substring(4, 6), 16);
-
-  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-
-  return yiq >= 128 ? "#000" : "#fff";
-}
-
-const BRAND_COLOR = "#7A2230";
+import {
+  getInitialVariantSelections,
+  getSelectedVariantStock,
+  getVariantLabels,
+  getVariantOptionStock,
+} from "@/lib/variants";
 
 export default function ProductCard({
   product,
@@ -56,7 +42,10 @@ export default function ProductCard({
 
   const hasImage = isValidImageSrc(product.productImage);
 
-  const sizeStockMap = product.sizeStockMap || {};
+  const cardVariantType = product.cardVariantType || product.variantTypes?.[0];
+  const variants = getInitialVariantSelections(product);
+  const selectedStock = getSelectedVariantStock(product, variants);
+  const canPurchase = !(product.variants || []).length || selectedStock > 0;
   const analyticsContext = {
     itemListId,
     itemListName,
@@ -64,8 +53,14 @@ export default function ProductCard({
   };
 
   function handleAddToCart() {
-    addItem(product, 1, { analytics: analyticsContext });
-    trackAddToCart(product, 1, undefined, analyticsContext);
+    if (!canPurchase) return;
+    addItem(product, 1, {
+      analytics: analyticsContext,
+      variants,
+      variantLabels: getVariantLabels(product),
+      maxQuantity: selectedStock > 0 ? selectedStock : 50,
+    });
+    trackAddToCart(product, 1, variants, analyticsContext);
 
     setAdded(true);
 
@@ -117,7 +112,7 @@ export default function ProductCard({
 
         <div className="mt-auto pt-3 border-t border-grey-100">
 
-          {/* PRICE + SIZES */}
+          {/* PRICE + PRIMARY VARIANT */}
           <div className="flex justify-between items-start gap-3 mb-3">
 
             <div>
@@ -137,32 +132,28 @@ export default function ProductCard({
               )}
             </div>
 
-            <div className="flex flex-wrap justify-end gap-1 max-w-[150px]">
-              {PRODUCT_SIZES.map((size) => {
-                const stock = sizeStockMap[size] || 0;
+            {cardVariantType && <div className="flex flex-wrap justify-end gap-1 max-w-[150px]">
+              <span className="w-full text-right text-[10px] text-grey-500">{cardVariantType.label}</span>
+              {cardVariantType.values.map((value) => {
+                const stock = getVariantOptionStock(product, {}, 0, value);
                 const isAvailable = stock > 0;
-                const stockLabel = `${getShortSize(size)} — ${isAvailable ? `${stock} in stock` : "Out of stock"}`;
+                const stockLabel = `${cardVariantType.label}: ${value} — ${isAvailable ? `${stock} in stock` : "Out of stock"}`;
 
                 return (
                   <span
-                    key={size}
+                    key={value}
                     aria-label={stockLabel}
                     tabIndex={0}
-                    className="px-1.5 py-1 rounded text-[9px] font-semibold relative group/size"
-                    style={{
-                      backgroundColor: isAvailable ? BRAND_COLOR : "#E5E7EB",
-                      color: isAvailable ? getContrastColor(BRAND_COLOR) : "#6B7280",
-                      textDecoration: isAvailable ? "none" : "line-through",
-                    }}
+                    className={`px-1.5 py-1 rounded text-[9px] font-semibold relative group/size ${isAvailable ? "bg-burgundy text-white" : "bg-grey-200 text-grey-500 line-through"}`}
                   >
-                    {getShortSize(size)}
+                    {value}
                     <span aria-hidden="true" className="pointer-events-none invisible absolute bottom-full mb-1 left-1/2 z-10 -translate-x-1/2 bg-foreground text-white text-[8px] px-1.5 py-0.5 rounded whitespace-nowrap group-hover/size:visible group-focus/size:visible">
                       {stockLabel}
                     </span>
                   </span>
                 );
               })}
-            </div>
+            </div>}
           </div>
 
           {/* ACTION BUTTONS */}
@@ -170,16 +161,17 @@ export default function ProductCard({
             <button
               type="button"
               onClick={handleAddToCart}
-              className="flex-1 px-3 py-2 border-2 border-burgundy text-burgundy text-xs font-semibold uppercase tracking-wider hover:bg-action hover:text-white transition-colors"
+              disabled={!canPurchase}
+              className="flex-1 px-3 py-2 border-2 border-burgundy text-burgundy text-xs font-semibold uppercase tracking-wider hover:bg-action hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {added ? "Added ✓" : "Add to Cart"}
+              {!canPurchase ? "Out of stock" : added ? "Added ✓" : "Add to Cart"}
             </button>
             <Link
-              href={orderHref}
+              href={canPurchase ? orderHref : productHref}
               onClick={handleProductSelect}
               className="flex-1 text-center px-3 py-2 bg-action text-white text-xs font-semibold uppercase tracking-wider hover:bg-action-dark transition-colors"
             >
-              Order Now
+              {canPurchase ? "Order Now" : "View Product"}
             </Link>
           </div>
         </div>

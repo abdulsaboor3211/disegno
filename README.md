@@ -20,6 +20,22 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Product images in the sheet
+
+In the `Product Image` cell, separate image URLs with a literal pipe (`|`):
+
+```text
+https://example.com/front.jpg | https://example.com/back.jpg | https://example.com/side.jpg
+```
+
+The first valid image is used on cards, in the cart, and at checkout. All images
+appear in the product page's thumbnail gallery in sheet order. Google Drive share
+links are supported. Spaces, empty entries, and duplicate images are ignored;
+existing single-image cells still work. If a URL itself contains a pipe, encode
+that character as `%7C`. Images must be publicly accessible.
+
+Run `npm run test:images` for the parser checks.
+
 ## Form security
 
 Contact messages and all checkout flows require Cloudflare Turnstile. Set

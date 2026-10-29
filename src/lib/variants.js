@@ -51,16 +51,27 @@ export function getVariantLabel(item, key) {
   );
 }
 
+export function normalizeProductVariantSelections(product, selections) {
+  const normalized = normalizeVariantSelections(selections);
+  const sizeType = product?.variantTypes?.find((type) => type.key === "size");
+  // Keep carts and checkout links created before sizes used the raw sheet values.
+  const legacySize = normalized.size?.match(/^UK \d+ \/ EU (\d+) \/ US \d+ \/ PAK \d+ \/ [\d.]+ cm$/)?.[1];
+  if (legacySize && !sizeType?.values.includes(normalized.size) && sizeType?.values.includes(legacySize)) {
+    normalized.size = legacySize;
+  }
+  return normalized;
+}
+
 export function getInitialVariantSelections(product, preferred = {}) {
   const types = product?.variantTypes || [];
   const rows = product?.variants || [];
-  const wanted = normalizeVariantSelections(preferred);
+  const wanted = normalizeProductVariantSelections(product, preferred);
   const completeRows = rows.filter((row) =>
     types.every((type) => row.options?.[type.key])
   );
   const stockedRows = completeRows.filter((row) => Number(row.stock) > 0);
 
-  const matchingRow = stockedRows.find((row) =>
+  const matchingRow = [...stockedRows, ...completeRows].find((row) =>
     Object.entries(wanted).every(
       ([key, value]) => !row.options?.[key] || row.options[key] === value
     )
@@ -68,12 +79,9 @@ export function getInitialVariantSelections(product, preferred = {}) {
   const selectedRow = matchingRow || stockedRows[0] || completeRows[0] || rows[0];
 
   return types.reduce((selections, type) => {
-    const preferredValue = wanted[type.key];
     const rowValue = selectedRow?.options?.[type.key];
 
-    selections[type.key] = type.values.includes(preferredValue)
-      ? preferredValue
-      : rowValue || type.values[0] || "";
+    selections[type.key] = wanted[type.key] || rowValue || type.values[0] || "";
 
     return selections;
   }, {});
@@ -155,7 +163,7 @@ export function selectVariantOption(product, selections, typeIndex, value) {
 export function getSelectedVariantStock(product, selections) {
   const types = product?.variantTypes || [];
   const rows = product?.variants || [];
-  const normalized = normalizeVariantSelections(selections);
+  const normalized = normalizeProductVariantSelections(product, selections);
   const requiredKeys = types.map((type) => type.key);
 
   if (requiredKeys.length === 0) {
@@ -183,4 +191,29 @@ export function getVariantLabels(product) {
     labels[type.key] = type.label;
     return labels;
   }, {});
+}
+
+export function withCategoryVariantOptions(products) {
+  const categories = new Map();
+
+  for (const product of products) {
+    const type = product.variantTypes?.[0];
+    if (!type) continue;
+    const category = String(product.category || "").trim().toLowerCase();
+    const key = JSON.stringify([category, type.key]);
+    const values = categories.get(key) || new Set();
+    type.values.forEach((value) => values.add(value));
+    categories.set(key, values);
+  }
+
+  return products.map((product) => {
+    const type = product.variantTypes?.[0];
+    if (!type) return product;
+    const category = String(product.category || "").trim().toLowerCase();
+    const key = JSON.stringify([category, type.key]);
+    return {
+      ...product,
+      cardVariantType: { ...type, values: [...categories.get(key)] },
+    };
+  });
 }
