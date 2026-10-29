@@ -1,12 +1,14 @@
 import { fallbackProducts } from "@/data/products";
-import { isValidImageSrc, normalizeImageUrl } from "@/lib/imageUrl";
-import { formatVariantLabel, normalizeVariantKey } from "@/lib/variants";
+import { isValidImageSrc, normalizeImageUrl, parseImageUrls } from "@/lib/imageUrl";
+import { formatVariantLabel, normalizeVariantKey, withCategoryVariantOptions } from "@/lib/variants";
 
 const SHEET_ID = "1YpRfa0F53dJ6OT_4FIcpMIwE331ZK7l0WRYqQbJU59c";
-const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+const SHEET_BASE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+const SHEET_TABS = { Sheet1: "0", Variants: "2034096658", Categories: "199410352" };
 
 function csvUrl(sheetName) {
-  return `${SHEET_BASE_URL}&sheet=${encodeURIComponent(sheetName)}`;
+  // Raw CSV preserves mixed numeric/text columns; gviz drops minority value types.
+  return `${SHEET_BASE_URL}&gid=${SHEET_TABS[sheetName]}`;
 }
 
 function parseCsv(csv) {
@@ -19,7 +21,7 @@ function parseCsv(csv) {
     const char = csv[index];
     const nextChar = csv[index + 1];
 
-    if (char === '"' && nextChar === '"') {
+    if (char === '"' && insideQuotes && nextChar === '"') {
       value += '"';
       index += 1;
     } else if (char === '"') {
@@ -99,7 +101,9 @@ function getVariantOptions(row) {
     return result;
   }, {});
 
-  return Object.entries(normalizedRow).reduce(
+  return Object.entries(normalizedRow).sort(([left], [right]) =>
+    Number(left.match(/\d+$/)?.[0] || 1) - Number(right.match(/\d+$/)?.[0] || 1)
+  ).reduce(
     (variant, [header, rawType]) => {
       const match = header.match(/^variants? type(?: (\d+))?$/);
 
@@ -110,14 +114,10 @@ function getVariantOptions(row) {
       const suffix = match[1] ? ` ${match[1]}` : "";
       const rawUnit = normalizedRow[`unit${suffix}`];
       const key = normalizeVariantKey(rawType);
-      let unit = String(rawUnit || "").trim();
+      const unit = String(rawUnit ?? "").trim();
 
       if (!key || !unit) {
         return variant;
-      }
-
-      if (key === "size") {
-        unit = getFullSizeLabel(unit);
       }
 
       variant.options[key] = unit;
@@ -146,6 +146,7 @@ async function fetchProductVariants() {
         row["stock"] ||
         row["Stock"] ||
         "0";
+      const stockQuantity = Number(stock.replaceAll(",", ""));
 
       const { options, labels } = getVariantOptions(row);
 
@@ -153,7 +154,7 @@ async function fetchProductVariants() {
         productId: String(productId).trim(),
         options,
         labels,
-        stock: toNumber(stock) || 0,
+        stock: Number.isFinite(stockQuantity) ? Math.max(0, stockQuantity) : 0,
       };
     }).filter((variant) => variant.productId && Object.keys(variant.options).length > 0);
 
@@ -162,23 +163,6 @@ async function fetchProductVariants() {
     console.error("❌ Error fetching variants:", error);
     return [];
   }
-}
-
-// Convert numeric size to full label format
-function getFullSizeLabel(numericSize) {
-  const sizeMap = {
-    "39": "UK 5 / EU 39 / US 6 / PAK 7 / 24.5 cm",
-    "40": "UK 6 / EU 40 / US 7 / PAK 8 / 25.1 cm",
-    "41": "UK 7 / EU 41 / US 8 / PAK 9 / 25.7 cm",
-    "42": "UK 8 / EU 42 / US 9 / PAK 10 / 26.3 cm",
-    "43": "UK 9 / EU 43 / US 10 / PAK 11 / 26.9 cm",
-    "44": "UK 10 / EU 44 / US 11 / PAK 12 / 27.5 cm",
-    "45": "UK 11 / EU 45 / US 12 / PAK 13 / 28.1 cm",
-    "46": "UK 12 / EU 46 / US 13 / PAK 14 / 28.7 cm",
-    "47": "UK 13 / EU 47 / US 14 / PAK 15 / 29.3 cm",
-    "48": "UK 14 / EU 48 / US 15 / PAK 16 / 29.9 cm",
-  };
-  return sizeMap[numericSize] || numericSize;
 }
 
 export async function getProducts() {
@@ -201,6 +185,7 @@ export async function getProducts() {
       .map((row) => {
         const productId = String(row["Product"] || "").trim();
         const productVariants = variantsByProduct[productId] || [];
+        const productImages = parseImageUrls(row["Product Image"]);
 
         const variantTypesByKey = new Map();
 
@@ -249,9 +234,8 @@ export async function getProducts() {
           sizeStockMap,
           availableSizes,
           allSizes: Object.keys(sizeStockMap),
-          productImage: isValidImageSrc(row["Product Image"])
-            ? normalizeImageUrl(row["Product Image"])
-            : "",
+          productImage: productImages[0] || "",
+          productImages,
           posterImage: "",
           img1: "",
           img2: "",
@@ -275,7 +259,7 @@ export async function getProducts() {
           product.status.toLowerCase() !== "inactive"
       );
 
-    return products.length > 0 ? products : fallbackProducts;
+    return products.length > 0 ? withCategoryVariantOptions(products) : fallbackProducts;
   } catch (error) {
     console.error("❌ Error fetching products:", error.message);
     return fallbackProducts;

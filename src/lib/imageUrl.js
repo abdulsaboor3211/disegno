@@ -38,6 +38,12 @@ export function cleanImageSrc(url) {
     .trim();
 }
 
+export function parseImageUrls(value) {
+  if (typeof value !== "string") return [];
+
+  return [...new Set(value.split("|").map(normalizeImageUrl).filter(Boolean))];
+}
+
 export function isValidImageSrc(url) {
   const trimmed = cleanImageSrc(url);
 

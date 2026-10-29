@@ -893,6 +893,18 @@ export default function OrderForm({
 
             {/* QUANTITY */}
 
+            {!singleCanPurchase && (
+              <p role="status" className="text-sm font-medium text-burgundy mt-4">
+                The selected options are unavailable. Please choose an available combination.
+              </p>
+            )}
+
+            {(product.variants || []).length > 0 && singleCanPurchase && (
+              <p className="text-xs text-grey-500 mt-4">
+                Units in stock for selected options: {selectedVariantStock}
+              </p>
+            )}
+
             <div className="flex items-center justify-between py-5 border-b border-grey-200">
 
               <span className="text-sm text-grey-600">
@@ -929,7 +941,7 @@ export default function OrderForm({
                     setQuantity(
                       (current) =>
                         Math.min(
-                          selectedVariantStock > 0 ? selectedVariantStock : 50,
+                          selectedVariantStock > 0 ? Math.min(50, selectedVariantStock) : 50,
                           current + 1
                         )
                     )
@@ -1024,6 +1036,9 @@ function VariantSelect({ type, value, onChange, id, getStock }) {
       <span className="block text-[10px] font-semibold uppercase tracking-wider text-grey-700 mb-1.5">
         {type.label}
       </span>
+      <span className="block text-xs text-grey-500 mb-1.5">
+        Available options: {type.values.filter((option) => getStock(option) > 0).length}
+      </span>
 
       <select
         id={id}
@@ -1034,6 +1049,9 @@ function VariantSelect({ type, value, onChange, id, getStock }) {
         }
         className="w-full appearance-none border border-grey-300 bg-white px-3 py-2.5 text-xs text-foreground focus:outline-none focus:border-burgundy"
       >
+        {value && !type.values.includes(value) && (
+          <option value={value} disabled>{value} — Unavailable</option>
+        )}
         {type.values.map(
           (option) => {
             const stock = getStock(option);

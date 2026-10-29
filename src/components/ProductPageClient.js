@@ -34,6 +34,7 @@ function getProductImages(product) {
 
     // Main image
     addImage(product.productImage);
+    (product.productImages || []).forEach(addImage);
 
     // img1 → img10
     for (let i = 1; i <= 10; i++) {
@@ -250,13 +251,9 @@ export default function ProductPageClient({ product }) {
                                         >
                                             {type.label}
                                         </label>
-                                        {typeIndex === variantTypes.length - 1 && (
-                                            <span className="text-xs text-grey-500">
-                                                {selectedStock > 0
-                                                    ? `${selectedStock} available`
-                                                    : "Out of stock"}
-                                            </span>
-                                        )}
+                                        <span className="text-xs text-grey-500">
+                                            Available options: {type.values.filter((value) => getVariantOptionStock(product, variants, typeIndex, value) > 0).length}
+                                        </span>
                                     </div>
 
                                     <select
@@ -298,12 +295,18 @@ export default function ProductPageClient({ product }) {
 
                             {/* Quantity */}
                             <div className="mb-6">
+                                {hasVariantRows && canPurchase && (
+                                    <p className="text-xs text-grey-500 mb-2">
+                                        Units in stock for selected options: {selectedStock}
+                                    </p>
+                                )}
                                 <p className="text-sm font-semibold uppercase tracking-wider text-foreground mb-2">
                                     Quantity
                                 </p>
                                 <div className="inline-flex items-center border border-grey-300">
                                     <button
                                         type="button"
+                                        aria-label="Decrease quantity"
                                         onClick={() =>
                                             setQuantity((current) => Math.max(1, current - 1))
                                         }
@@ -316,10 +319,11 @@ export default function ProductPageClient({ product }) {
                                     </span>
                                     <button
                                         type="button"
+                                        aria-label="Increase quantity"
                                         onClick={() =>
                                             setQuantity((current) =>
                                                 Math.min(
-                                                    selectedStock > 0 ? selectedStock : 50,
+                                                    selectedStock > 0 ? Math.min(50, selectedStock) : 50,
                                                     current + 1
                                                 )
                                             )

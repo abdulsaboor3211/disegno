@@ -4,9 +4,10 @@ import test from "node:test";
 import vm from "node:vm";
 
 const verifierSource = await readFile(new URL("../src/lib/turnstile.js", import.meta.url), "utf8");
+const variantsSource = await readFile(new URL("../src/lib/variants.js", import.meta.url), "utf8");
 
-async function harness({ action = "contact", result, env = {}, failure, httpStatus = 200 } = {}) {
-  const calls = { verification: [], emails: 0, products: 0 };
+async function harness({ action = "contact", result, env = {}, failure, httpStatus = 200, products = [{ sku: "test-product", productName: "Test product", productPrice: 100 }] } = {}) {
+  const calls = { verification: [], emails: 0, emailPayloads: [], products: 0 };
   const context = vm.createContext({
     process: { env: { NODE_ENV: "production", TURNSTILE_SECRET_KEY: "private-test-secret", ...env } },
     AbortSignal,
@@ -22,6 +23,9 @@ async function harness({ action = "contact", result, env = {}, failure, httpStat
   const verifier = new vm.SourceTextModule(verifierSource, { context });
   await verifier.link(() => { throw new Error("Verifier must have no client dependencies"); });
   await verifier.evaluate();
+  const variants = new vm.SourceTextModule(variantsSource, { context });
+  await variants.link(() => { throw new Error("Unexpected variant dependency"); });
+  await variants.evaluate();
 
   function module(exports) {
     return new vm.SyntheticModule(Object.keys(exports), function () {
@@ -36,20 +40,17 @@ async function harness({ action = "contact", result, env = {}, failure, httpStat
       if (specifier === "@/lib/turnstile") return verifier;
       if (specifier === "next/server") return module({ NextResponse: Response });
       if (specifier === "resend") return module({ Resend: class {
-        emails = { send: async () => {
+        emails = { send: async (payload) => {
           calls.emails++;
+          calls.emailPayloads.push(payload);
           return { data: { id: "test-email" } };
         } };
       } });
       if (specifier === "@/lib/googleSheets") return module({ getProducts: async () => {
         calls.products++;
-        return [{ sku: "test-product", productName: "Test product", productPrice: 100 }];
+        return products;
       } });
-      if (specifier === "@/lib/variants") return module({
-        formatVariantLabel: (value) => value,
-        getSelectedVariantStock: () => 100,
-        normalizeVariantSelections: (value) => value || {},
-      });
+      if (specifier === "@/lib/variants") return variants;
       throw new Error(`Unexpected dependency: ${specifier}`);
     });
     await entry.evaluate();
@@ -164,6 +165,46 @@ for (const [endpoint, action] of [["contact", "contact"], ["orders", "order"]]) 
     assert.equal(calls.verification.length, 1);
   });
 }
+
+test("orders combine legacy and raw-size entries before enforcing stock and quantity limits", async () => {
+  const oldSize = "UK 5 / EU 39 / US 6 / PAK 7 / 24.5 cm";
+  for (const scenario of [
+    { stock: 1, sizes: [oldSize, "39"], quantities: [1, 1], expectedStatus: 400 },
+    { stock: 2, sizes: [oldSize, "39"], quantities: [1, 1], expectedStatus: 200, lines: 1 },
+    { stock: 1, sizes: ["39", "40"], quantities: [1, 1], expectedStatus: 200, lines: 2 },
+    { stock: 100, sizes: [oldSize, "39"], quantities: [30, 30], expectedStatus: 400 },
+  ]) {
+    const product = {
+      sku: "test-product", productName: "Test product", productPrice: 100,
+      variantTypes: [
+        { key: "size", label: "Size", values: ["39", "40"] },
+        { key: "color", label: "Color", values: ["Black"] },
+      ],
+      variants: ["39", "40"].map((size) => ({ options: { size, color: "Black" }, stock: scenario.stock })),
+    };
+    const { route, calls } = await harness({ action: "order", products: [product], env: {
+      RESEND_API_KEY: "test-key", ORDER_EMAIL_TO: "orders@example.test",
+    } });
+    const { POST } = await route("orders");
+    const response = await POST(new Request("https://disegnoproducts.com/api/orders", {
+      method: "POST",
+      body: JSON.stringify({ ...payload, turnstileToken: "valid-token", items: scenario.sizes.map((size, index) => ({
+        productSku: product.sku, productName: product.productName, quantity: scenario.quantities[index],
+        variants: index === 0 ? { size, color: "Black" } : { color: "Black", size, ignored: "not an inventory dimension" },
+      })) }),
+    }));
+    assert.equal(response.status, scenario.expectedStatus);
+    if (scenario.expectedStatus === 400) {
+      assert.equal(calls.emails, 0);
+    } else {
+      assert.equal(calls.emails, 1);
+      const html = calls.emailPayloads[0].html;
+      assert.equal((html.match(/Size: /g) || []).length, scenario.lines);
+      assert.ok(html.includes("Order total: Rs. 200"));
+      assert.ok(!html.includes(oldSize));
+    }
+  }
+});
 
 test("public configuration returns only the site key and fails closed when misconfigured", async () => {
   for (const secret of ["private-test-secret", ""]) {

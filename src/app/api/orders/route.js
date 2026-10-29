@@ -6,6 +6,7 @@ import {
   formatVariantLabel,
   getSelectedVariantStock,
   normalizeVariantSelections,
+  normalizeProductVariantSelections,
 } from "@/lib/variants";
 
 function escapeHtml(value) {
@@ -176,7 +177,7 @@ export async function POST(request) {
     const productsBySku = new Map(
       products.map((product) => [String(product.sku), product])
     );
-    const items = [];
+    const itemsByVariant = new Map();
 
     for (const submittedItem of submittedItems) {
       const product = productsBySku.get(submittedItem.productSku);
@@ -189,6 +190,7 @@ export async function POST(request) {
       }
 
       const variantTypes = product.variantTypes || [];
+      submittedItem.variants = normalizeProductVariantSelections(product, submittedItem.variants);
       const missingType = variantTypes.find(
         (type) => !submittedItem.variants[type.key]
       );
@@ -200,13 +202,27 @@ export async function POST(request) {
         );
       }
 
+      const variantId = JSON.stringify([
+        String(product.sku),
+        ...variantTypes.map((type) => submittedItem.variants[type.key]),
+      ]);
+      const existing = itemsByVariant.get(variantId);
+      const quantity = (existing?.quantity || 0) + submittedItem.quantity;
+
+      if (quantity > 50) {
+        return NextResponse.json(
+          { error: `The combined quantity for ${product.productName} must not exceed 50 per variant` },
+          { status: 400 }
+        );
+      }
+
       const hasVariantRows = (product.variants || []).length > 0;
       const selectedStock = getSelectedVariantStock(
         product,
         submittedItem.variants
       );
 
-      if (hasVariantRows && selectedStock < submittedItem.quantity) {
+      if (hasVariantRows && selectedStock < quantity) {
         return NextResponse.json(
           {
             error:
@@ -218,14 +234,19 @@ export async function POST(request) {
         );
       }
 
+      if (existing) {
+        existing.quantity = quantity;
+        continue;
+      }
+
       const hasDiscount =
         product.discountPrice &&
         product.discountPrice < product.productPrice;
 
-      items.push({
+      itemsByVariant.set(variantId, {
         productSku: String(product.sku),
         productName: product.productName,
-        quantity: submittedItem.quantity,
+        quantity,
         unitPrice: hasDiscount
           ? product.discountPrice
           : product.productPrice || 0,
@@ -237,6 +258,7 @@ export async function POST(request) {
       });
     }
 
+    const items = [...itemsByVariant.values()];
     const total = items.reduce(
       (sum, item) => sum + item.unitPrice * item.quantity,
       0
